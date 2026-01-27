@@ -62,7 +62,7 @@ try {
         case 'transactions':
             // Transaction endpoints (protected)
             require_once __DIR__ . '/JWTMiddleware.php';
-            $user_id = JWTMiddleware::authenticate();
+            $userData = JWTMiddleware::verify();
 
             if ($method === 'POST' && empty($action)) {
                 require_once __DIR__ . '/transactions/create.php';
@@ -86,7 +86,7 @@ try {
         case 'user':
             // User endpoints (protected)
             require_once __DIR__ . '/JWTMiddleware.php';
-            $user_id = JWTMiddleware::authenticate();
+            $userData = JWTMiddleware::verify();
 
             if ($action === 'status' && $method === 'GET') {
                 require_once __DIR__ . '/user/status.php';
@@ -98,7 +98,7 @@ try {
         case 'payments':
             // Payment endpoints (protected)
             require_once __DIR__ . '/JWTMiddleware.php';
-            $user_id = JWTMiddleware::authenticate();
+            $userData = JWTMiddleware::verify();
 
             if ($action === 'create-checkout' && $method === 'POST') {
                 require_once __DIR__ . '/payments/create-checkout.php';

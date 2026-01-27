@@ -55,7 +55,7 @@
       "id": 3,
       "title": "User Registration & Authentication",
       "description": "Implement user registration with password hashing and JWT-based login",
-      "status": "pending",
+      "status": "completed",
       "tasks": [
         "Create auth/register.php endpoint",
         "Implement password hashing with password_hash()",
