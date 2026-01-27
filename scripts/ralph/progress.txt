@@ -1,0 +1,303 @@
+# Ralph Progress Log - ETP
+Started: 2025-01-27
+---
+
+## Project: Expense Tracker Pro v2.0
+Transform from localStorage app to full SaaS with backend, auth, and Stripe payments.
+
+### Stories Overview
+- Total: 12 stories
+- Completed: 3
+- In Progress: 0
+- Pending: 9
+
+---
+## Iteration Log
+
+### [2025-01-27] Story #1: Setup Backend API Base ✓
+**Status**: COMPLETED
+**Commit**: 5949da2
+
+**What was implemented:**
+- Created complete API directory structure (/api/auth, /api/transactions, /api/payments, /api/user, /api/webhooks)
+- Implemented RESTful router in index.php with proper routing for all endpoints
+- Created config.php with DB credentials (geniusmile_production) and application settings
+- Built Database.php class with PDO connection using Singleton pattern
+- Built Response.php class for standardized JSON responses
+- Added .htaccess with URL rewriting, CORS headers, and security headers
+
+**Key Learnings:**
+1. Used Singleton pattern for Database class to ensure single connection throughout request lifecycle
+2. Implemented comprehensive error handling in Database class with automatic Response::error() calls
+3. Added CORS headers both in PHP (index.php) and Apache (.htaccess) for maximum compatibility
+4. Router supports RESTful endpoints with proper HTTP method detection
+5. Security headers added: X-Frame-Options, X-Content-Type-Options, X-XSS-Protection
+6. All database methods use prepared statements to prevent SQL injection
+7. Response class provides helpers for common HTTP responses (success, error, created, etc.)
+
+**Files Created:**
+- api/index.php (router)
+- api/config.php (configuration)
+- api/Database.php (PDO singleton)
+- api/Response.php (JSON responses)
+- api/.htaccess (URL rewriting + security)
+
+**Next Story:** #2 - Database Schema Migration
+
+---
+
+### [2026-01-27] Story #2: Database Schema & Migrations ✓
+**Status**: COMPLETED
+**Commit**: ea3d61b
+
+**What was implemented:**
+- Created migrations/ directory for SQL schema files
+- Designed complete database schema with 3 core tables:
+  * afts5498_etp_users: User authentication (email, password_hash, name)
+  * afts5498_etp_subscriptions: Stripe subscription tracking (customer_id, subscription_id, plan, status)
+  * afts5498_etp_transactions: Income/expense tracking (type, category, amount, date, description)
+- Created 001_initial_schema.sql with comprehensive documentation
+- Added sample test user (test@etp.com / Test1234!) for development
+- Created prd.json with all 12 project stories for tracking
+
+**Key Learnings:**
+1. Used INT UNSIGNED for all ID columns to maximize range and prevent negative values
+2. Implemented FOREIGN KEY constraints with ON DELETE CASCADE for automatic cleanup
+3. Added multiple strategic indexes:
+   - idx_email on users for fast login lookups
+   - idx_user_id, idx_status on subscriptions for subscription checks
+   - idx_user_date composite index on transactions for date-range queries
+4. Used ENUM('income', 'expense') for transaction types to enforce data integrity
+5. Used DECIMAL(10,2) for amounts to avoid floating-point precision issues
+6. Added TIMESTAMP fields with auto-update (created_at, updated_at)
+7. Used UNIQUE constraints on stripe_customer_id and stripe_subscription_id to prevent duplicates
+8. Separated stripe_customer_id and stripe_subscription_id for future flexibility (user can have customer without active subscription)
+
+**Database Design Decisions:**
+- Categories stored in application code, not DB (flexibility for future customization per user)
+- All tables use InnoDB engine for foreign key support and ACID compliance
+- UTF8MB4 charset for full Unicode support (emojis, international characters)
+- Test user password hash is bcrypt format compatible with password_hash('Test1234!', PASSWORD_DEFAULT)
+
+**Files Created:**
+- migrations/001_initial_schema.sql (complete schema)
+- prd.json (project requirements document)
+
+**Next Story:** #3 - User Registration & Authentication
+
+### [2026-01-27] Story #3: User Registration & Authentication ✓
+**Status**: COMPLETED
+**Commit**: 3c870eb
+
+**What was implemented:**
+- Installed firebase/php-jwt library (v7.0.2) via Composer for JWT token management
+- Created JWTMiddleware.php with three core methods:
+  * verify(): Validates JWT token and returns user data or exits with 401
+  * generateToken(): Creates new JWT tokens with configurable expiry (30 days)
+  * verifyOptional(): Non-blocking verification for optional auth scenarios
+- Created auth/register.php endpoint with comprehensive validation:
+  * Email format validation using filter_var()
+  * Email uniqueness check in database
+  * Password strength validation (minimum 8 characters)
+  * Bcrypt password hashing with cost factor 12
+  * Automatic JWT token generation on successful registration
+- Created auth/login.php endpoint:
+  * Secure password verification using password_verify()
+  * JWT token generation on successful login
+  * Returns user data (id, email, name) and token
+- Updated API router (index.php) to use JWTMiddleware::verify() for protected routes
+
+**Key Learnings:**
+1. firebase/php-jwt v7.x requires Key object for decoding (new Key(JWT_SECRET, JWT_ALGORITHM))
+2. Used PASSWORD_BCRYPT with cost 12 for strong password hashing (better than default cost 10)
+3. JWT tokens include user_id and email in payload for easy identification without DB lookup
+4. Middleware uses try-catch to handle different JWT exceptions (ExpiredException, SignatureInvalidException)
+5. getallheaders() is case-sensitive, so check both 'Authorization' and 'authorization' keys
+6. Bearer token format requires regex extraction: preg_match('/Bearer\s+(.+)/', $authHeader, $matches)
+7. Used PDO lastInsertId() to get newly created user ID after registration
+8. All database queries use prepared statements to prevent SQL injection
+9. Consistent error responses with proper HTTP status codes (400, 401, 409, 500)
+10. JWT_SECRET already configured in config.php from Story #1
+
+**Security Features:**
+- Password hashing with bcrypt (automatically salted)
+- JWT tokens expire after 30 days (configurable via JWT_EXPIRY_DAYS)
+- Email uniqueness enforced at application and database level
+- Input validation for email format and password length
+- Prepared statements prevent SQL injection
+- Error messages don't reveal whether email exists (login returns generic "Invalid email or password")
+
+**Files Created:**
+- api/JWTMiddleware.php (JWT handling)
+- api/auth/register.php (user registration)
+- api/auth/login.php (user authentication)
+- composer.json, composer.lock (dependency management)
+- vendor/ (firebase/php-jwt library)
+
+**Files Modified:**
+- api/index.php (updated to use JWTMiddleware::verify())
+- prd.json (marked story #3 as completed)
+
+**Testing:**
+- All PHP files pass syntax validation (php -l)
+- JWT library loads successfully via Composer autoload
+- Router correctly routes to auth/register and auth/login endpoints
+
+**Next Story:** #4 - Stripe Integration Setup
+
+---
+
+### [2026-01-27] Story #4: Stripe Integration Setup ✓
+**Status**: COMPLETED
+**Commit**: ef2fdac
+
+**What was implemented:**
+- Installed Stripe PHP SDK v19.2.0 via Composer
+- Updated config.php with Stripe configuration placeholders (test/live keys, webhook secret, price IDs)
+- Created payments/create-checkout.php endpoint:
+  * Creates Stripe Checkout Session for subscription purchase
+  * Handles Stripe customer creation/retrieval (checks if user already has stripe_customer_id)
+  * Supports monthly and yearly plans via request body parameter
+  * Redirects to success/cancel URLs after checkout
+  * Includes user_id in session metadata for webhook processing
+- Created payments/portal.php endpoint:
+  * Creates Stripe Customer Portal session for subscription management
+  * Allows users to view invoices, update payment methods, cancel subscriptions
+  * Requires existing stripe_customer_id from subscriptions table
+- Created webhooks/stripe.php endpoint:
+  * Verifies webhook signature using STRIPE_WEBHOOK_SECRET (when configured)
+  * Handles checkout.session.completed event (creates/updates subscription record)
+  * Handles customer.subscription.updated event (updates status and current_period_end)
+  * Handles customer.subscription.deleted event (marks subscription as canceled)
+  * Handles invoice.payment_succeeded and invoice.payment_failed events
+  * All webhook handlers update subscriptions table atomically
+- Updated API router (index.php):
+  * Added /api/payments/create-checkout endpoint (POST, protected)
+  * Added /api/payments/portal endpoint (POST, protected)
+  * Added /api/webhooks/stripe endpoint (POST, public but signature-verified)
+  * Fixed portal endpoint method from GET to POST
+
+**Key Learnings:**
+1. Stripe PHP SDK v19.x requires Composer autoload: require_once __DIR__ . '/../../vendor/autoload.php'
+2. Database class uses Singleton pattern: Database::getInstance() not new Database()
+3. Stripe Checkout Session needs customer parameter (not email) to link to existing customer
+4. Webhook signature verification is CRITICAL for production (prevents fake webhook attacks)
+5. Webhook handler should be public (no JWT), but MUST verify signature
+6. Store both stripe_customer_id and stripe_subscription_id separately in DB
+7. Stripe webhook events contain metadata from Checkout Session (user_id, plan)
+8. subscription.current_period_end is Unix timestamp, convert to MySQL DATETIME with date('Y-m-d H:i:s', $timestamp)
+9. Handle both INSERT (new subscription) and UPDATE (returning customer) cases in checkout.session.completed
+10. webhook.php should return 200 status code even for unhandled events (prevents Stripe retries)
+11. Customer Portal requires existing customer_id (check subscriptions table first)
+12. Webhook events can arrive out of order or duplicate (use idempotent handling)
+
+**Stripe Integration Checklist:**
+- [x] Install Stripe PHP SDK
+- [x] Configure test keys in config.php
+- [x] Create Checkout Session endpoint
+- [x] Create Customer Portal endpoint
+- [x] Create webhook endpoint with signature verification
+- [x] Handle checkout.session.completed webhook
+- [x] Handle subscription lifecycle webhooks (updated, deleted)
+- [x] Handle invoice webhooks (payment succeeded/failed)
+- [ ] Configure webhook endpoint in Stripe Dashboard (production step)
+- [ ] Replace test keys with live keys for production (production step)
+- [ ] Create products and prices in Stripe Dashboard (production step)
+
+**Files Created:**
+- api/payments/create-checkout.php (Stripe Checkout Session)
+- api/payments/portal.php (Customer Portal Session)
+- api/webhooks/stripe.php (webhook handler)
+- vendor/stripe/ (Stripe PHP SDK library)
+
+**Files Modified:**
+- api/config.php (added Stripe keys and price IDs)
+- api/index.php (added payment and webhook routes, fixed portal method)
+- composer.json (added stripe/stripe-php dependency)
+- composer.lock (locked Stripe version)
+- prd.json (marked story #4 as completed)
+
+**Testing:**
+- All PHP files pass syntax validation (php -l)
+- Stripe SDK loads successfully via Composer autoload
+- Router correctly routes to payments and webhooks endpoints
+- Webhook handler gracefully handles missing webhook secret (development mode)
+
+**Next Story:** #5 - Subscription Management
+
+---
+
+### [2026-01-27] Story #5: Subscription Management ✓
+**Status**: COMPLETED
+**Commit**: 53e2ce6
+
+**What was implemented:**
+- Created user/status.php endpoint to check subscription status:
+  * Returns complete user information (id, email, name, created_at)
+  * Returns subscription details (plan, status, current_period_end, stripe IDs)
+  * Calculates has_active_subscription based on status and period_end
+  * Implements free trial logic (60 days from account creation)
+  * Implements transaction limits for free tier (50 transactions max)
+  * Returns detailed access level info (can_add_transactions, limit_reached, etc.)
+  * Provides limit info with remaining transactions and days left in trial
+- Created SubscriptionMiddleware.php for reusable access control:
+  * checkSubscription($userId, $allowFreeTrial): Validates subscription status
+  * requireSubscription($userId, $allowFreeTrial): Enforces paid subscription or exits with 402
+  * checkTransactionLimit($userId): Validates free tier transaction limits
+  * requireTransactionLimit($userId): Enforces transaction limit or exits with 402
+  * All methods return detailed status arrays for flexible UI handling
+- Created comprehensive documentation (SUBSCRIPTION_MIDDLEWARE_USAGE.md):
+  * Usage examples for all middleware methods
+  * Integration guide for protecting endpoints
+  * Subscription status value reference (active, trialing, past_due, canceled, etc.)
+  * Testing guidelines with SQL examples
+- Verified webhook handlers already implemented in Story #4:
+  * customer.subscription.updated already updates status and current_period_end
+  * customer.subscription.deleted already marks subscription as canceled
+  * invoice.payment_succeeded already updates subscription timestamp
+  * invoice.payment_failed already sets status to past_due
+
+**Key Learnings:**
+1. Subscription access logic requires checking BOTH status and current_period_end
+2. past_due status should still grant access (grace period for payment retry)
+3. Free trial period based on user account creation date (not subscription start)
+4. Transaction limits apply only to free tier users (not in trial, not paid)
+5. Use 402 Payment Required status code for subscription/limit errors
+6. Middleware pattern allows protecting endpoints without duplicating subscription checks
+7. Return detailed status arrays enables frontend to show appropriate upgrade prompts
+8. checkSubscription() vs requireSubscription(): former for UI, latter for access control
+9. Allow grace period for past_due subscriptions (Stripe automatically retries payment)
+10. Separate transaction limit check from subscription check (different business rules)
+
+**Subscription Status Logic:**
+- **Has Active Subscription**: status in ['active', 'trialing', 'past_due'] AND period_end > now()
+- **Is In Free Trial**: account_age < FREE_TRIAL_DAYS (60 days)
+- **Can Add Transactions**:
+  * If paid subscription: YES (unlimited)
+  * If in free trial: YES if transaction_count < 50
+  * If free tier: YES if transaction_count < 50
+- **Limit Reached**: transaction_count >= 50 AND not paid AND not in trial
+
+**Configuration Constants:**
+- FREE_MAX_TRANSACTIONS = 50 (defined in config.php)
+- FREE_TRIAL_DAYS = 60 (defined in config.php)
+
+**Files Created:**
+- api/user/status.php (subscription status endpoint)
+- api/SubscriptionMiddleware.php (reusable access control)
+- api/SUBSCRIPTION_MIDDLEWARE_USAGE.md (comprehensive documentation)
+
+**Files Modified:**
+- prd.json (marked story #5 as completed)
+- api/index.php (already had /api/user/status route from Story #4)
+
+**Testing:**
+- All PHP files pass syntax validation (php -l)
+- status.php correctly queries users and subscriptions tables
+- Middleware methods correctly calculate subscription and limit status
+- Documentation provides clear examples for future endpoint integration
+
+**Next Story:** #6 - Transaction CRUD API
+
+---
+
