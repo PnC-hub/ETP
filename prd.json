@@ -1,0 +1,213 @@
+{
+  "project": {
+    "name": "Expense Tracker Pro",
+    "version": "1.0.0",
+    "description": "Multi-user expense tracking SaaS with Stripe integration",
+    "tech_stack": {
+      "backend": "PHP 8.1+",
+      "frontend": "Vanilla JavaScript",
+      "database": "MySQL 8.0",
+      "payment": "Stripe",
+      "auth": "JWT"
+    },
+    "deployment": {
+      "url": "etp.geniusmile.com",
+      "server_path": "/var/www/vhosts/geniusmile.com/etp/",
+      "database": {
+        "name": "geniusmile_production",
+        "prefix": "afts5498_etp_",
+        "user": "geniusmile",
+        "password": "dI20mgnkINkQ4iRBOoQHl0gh"
+      }
+    }
+  },
+  "stories": [
+    {
+      "id": 1,
+      "title": "Setup Backend API Base",
+      "description": "Create the base API structure with database connection, routing, and response handling",
+      "status": "completed",
+      "tasks": [
+        "Create api/ directory structure",
+        "Create Database.php class with PDO connection",
+        "Create Response.php class for standardized JSON responses",
+        "Create config.php with DB credentials and app settings",
+        "Create index.php router with CORS handling",
+        "Test API endpoint responds correctly"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Database Schema & Migrations",
+      "description": "Design and implement the complete database schema for users, subscriptions, and transactions",
+      "status": "completed",
+      "tasks": [
+        "Create migrations/ directory",
+        "Design schema for users table (id, email, password_hash, name, created_at, updated_at)",
+        "Design schema for subscriptions table (id, user_id, stripe_customer_id, stripe_subscription_id, plan, status, current_period_end)",
+        "Design schema for transactions table (id, user_id, type, category, amount, description, date, created_at)",
+        "Create 001_initial_schema.sql migration file",
+        "Add indexes for performance (user_id, date, type)",
+        "Document the schema"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "User Registration & Authentication",
+      "description": "Implement user registration with password hashing and JWT-based login",
+      "status": "pending",
+      "tasks": [
+        "Create auth/register.php endpoint",
+        "Implement password hashing with password_hash()",
+        "Validate email format and uniqueness",
+        "Create auth/login.php endpoint",
+        "Implement JWT token generation (use firebase/php-jwt library)",
+        "Create JWTMiddleware.php for protected routes",
+        "Return user data and token on successful login"
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Stripe Integration Setup",
+      "description": "Configure Stripe SDK and create subscription checkout flow",
+      "status": "pending",
+      "tasks": [
+        "Install Stripe PHP library (composer require stripe/stripe-php)",
+        "Add Stripe keys to config.php (test keys for now)",
+        "Create payments/create-checkout.php endpoint",
+        "Implement Stripe Checkout Session creation for subscription",
+        "Handle success and cancel URLs",
+        "Create payments/webhook.php for Stripe events",
+        "Verify webhook signature",
+        "Handle checkout.session.completed event"
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Subscription Management",
+      "description": "Store and manage subscription status in database",
+      "status": "pending",
+      "tasks": [
+        "Create user/status.php endpoint to check subscription",
+        "Update subscriptions table on webhook events",
+        "Handle subscription lifecycle (active, canceled, past_due)",
+        "Implement middleware to check subscription status",
+        "Return subscription details to frontend",
+        "Handle customer.subscription.updated webhook",
+        "Handle customer.subscription.deleted webhook"
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Transaction CRUD API",
+      "description": "Build complete CRUD operations for transactions with validation",
+      "status": "pending",
+      "tasks": [
+        "Create transactions/create.php endpoint",
+        "Validate transaction data (type, amount, date, category)",
+        "Create transactions/read.php with filtering (date range, type, category)",
+        "Implement pagination for read endpoint",
+        "Create transactions/update.php endpoint",
+        "Create transactions/delete.php endpoint",
+        "Ensure all endpoints check subscription status",
+        "Return proper error codes and messages"
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Data Export Feature",
+      "description": "Allow users to export their transactions to CSV format",
+      "status": "pending",
+      "tasks": [
+        "Create transactions/export.php endpoint",
+        "Generate CSV with proper headers",
+        "Include all transaction fields",
+        "Apply same filters as read endpoint (date range, type)",
+        "Set proper CSV Content-Type headers",
+        "Handle large datasets efficiently",
+        "Test download in browser"
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Frontend Authentication UI",
+      "description": "Update index.html with login/register forms and token management",
+      "status": "pending",
+      "tasks": [
+        "Add login form HTML",
+        "Add registration form HTML",
+        "Implement login form submission with fetch()",
+        "Store JWT token in localStorage",
+        "Implement register form submission",
+        "Add form validation (email, password strength)",
+        "Show/hide forms based on auth state",
+        "Add logout functionality"
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Frontend Subscription Flow",
+      "description": "Implement Stripe Checkout integration in frontend",
+      "status": "pending",
+      "tasks": [
+        "Add subscription status check on load",
+        "Show subscription prompt for free users",
+        "Implement 'Subscribe' button click handler",
+        "Redirect to Stripe Checkout",
+        "Handle return from Stripe (success/cancel)",
+        "Update UI based on subscription status",
+        "Add loading states during API calls"
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Frontend Transaction Management",
+      "description": "Build the main transaction UI with add/edit/delete/filter",
+      "status": "pending",
+      "tasks": [
+        "Create transaction list display",
+        "Implement add transaction form",
+        "Add category dropdown (configurable categories)",
+        "Implement edit transaction (inline or modal)",
+        "Add delete transaction with confirmation",
+        "Implement date range filter",
+        "Add type filter (income/expense)",
+        "Add category filter",
+        "Calculate and display totals/summary"
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Frontend Export & Dashboard",
+      "description": "Add export button and basic analytics dashboard",
+      "status": "pending",
+      "tasks": [
+        "Add 'Export CSV' button",
+        "Implement export download functionality",
+        "Create summary cards (total income, expenses, balance)",
+        "Add simple chart/graph (Chart.js or vanilla canvas)",
+        "Show monthly breakdown",
+        "Add date range selector for dashboard",
+        "Implement responsive layout for mobile"
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Testing & Deployment",
+      "description": "Test all functionality and deploy to production server",
+      "status": "pending",
+      "tasks": [
+        "Test full registration flow",
+        "Test login and token persistence",
+        "Test Stripe checkout flow (test mode)",
+        "Test webhook handling",
+        "Test all CRUD operations",
+        "Test export functionality",
+        "Test UI on mobile devices",
+        "Push code to GitHub",
+        "Deploy to etp.geniusmile.com",
+        "Verify production deployment works"
+      ]
+    }
+  ]
+}
