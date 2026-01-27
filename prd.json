@@ -101,7 +101,7 @@
       "id": 6,
       "title": "Transaction CRUD API",
       "description": "Build complete CRUD operations for transactions with validation",
-      "status": "pending",
+      "status": "completed",
       "tasks": [
         "Create transactions/create.php endpoint",
         "Validate transaction data (type, amount, date, category)",

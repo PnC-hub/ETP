@@ -61,25 +61,22 @@ try {
 
         case 'transactions':
             // Transaction endpoints (protected)
-            require_once __DIR__ . '/JWTMiddleware.php';
-            $userData = JWTMiddleware::verify();
+            // These endpoints handle their own JWT verification
 
-            if ($method === 'POST' && empty($action)) {
+            if ($action === 'create' && $method === 'POST') {
                 require_once __DIR__ . '/transactions/create.php';
-            } elseif ($method === 'GET' && empty($action)) {
+            } elseif ($action === 'read' && $method === 'GET') {
                 require_once __DIR__ . '/transactions/read.php';
-            } elseif ($method === 'PUT' && !empty($action)) {
-                $id = $action;
+            } elseif ($action === 'update' && $method === 'PUT') {
                 require_once __DIR__ . '/transactions/update.php';
-            } elseif ($method === 'DELETE' && !empty($action)) {
-                $id = $action;
+            } elseif ($action === 'delete' && $method === 'DELETE') {
                 require_once __DIR__ . '/transactions/delete.php';
             } elseif ($action === 'export' && $method === 'GET') {
                 require_once __DIR__ . '/transactions/export.php';
             } elseif ($action === 'import' && $method === 'POST') {
                 require_once __DIR__ . '/transactions/import.php';
             } else {
-                Response::error('Endpoint not found', 404);
+                Response::error('Endpoint not found. Available: create (POST), read (GET), update (PUT), delete (DELETE), export (GET)', 404);
             }
             break;
 
