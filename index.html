@@ -886,6 +886,15 @@
             .category-stats {
                 grid-template-columns: repeat(3, 1fr);
             }
+
+            #monthlyBreakdown .form-group {
+                min-width: 100%;
+            }
+
+            #monthlyBreakdown button {
+                width: 100%;
+                margin-top: 12px !important;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1076,6 +1085,23 @@
             </div>
         </section>
 
+        <!-- MONTHLY BREAKDOWN -->
+        <section class="card" id="monthlyBreakdown">
+            <h2 class="card-title">📅 Breakdown Mensile</h2>
+            <div style="display: flex; gap: 12px; margin-bottom: 16px; align-items: center; flex-wrap: wrap;">
+                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
+                    <label for="dashboardDateFrom">Da</label>
+                    <input type="date" id="dashboardDateFrom">
+                </div>
+                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
+                    <label for="dashboardDateTo">A</label>
+                    <input type="date" id="dashboardDateTo">
+                </div>
+                <button class="btn btn-primary" onclick="updateDashboardDateRange()" style="margin-top: 20px;">Aggiorna Dashboard</button>
+            </div>
+            <div id="monthlyBreakdownContent" style="margin-top: 20px;"></div>
+        </section>
+
         <!-- ADD TRANSACTION FORM -->
         <section class="card form-section">
             <h2 class="card-title">➕ <span id="formTitle">Aggiungi una transazione</span></h2>
@@ -1188,9 +1214,10 @@
                     </select>
                 </div>
             </div>
-            <div style="display: flex; gap: 12px; margin-top: 16px;">
+            <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
                 <button class="btn btn-primary" onclick="applyFilters()">Applica Filtri</button>
                 <button class="btn btn-outline" onclick="resetFilters()">Reset</button>
+                <button class="btn btn-primary" onclick="exportToCSV()" style="margin-left: auto;">📤 Export CSV</button>
             </div>
         </section>
 
@@ -2018,6 +2045,7 @@
             updateTransactions();
             updateCharts();
             updateSavings();
+            updateMonthlyBreakdown();
             updateFooter();
         }
 
@@ -2313,6 +2341,104 @@
         }
 
         /**
+         * Update monthly breakdown
+         */
+        function updateMonthlyBreakdown() {
+            const contentEl = document.getElementById('monthlyBreakdownContent');
+
+            // Get date range from dashboard filters or use defaults
+            const dateFrom = document.getElementById('dashboardDateFrom').value;
+            const dateTo = document.getElementById('dashboardDateTo').value;
+
+            // Filter transactions by date range
+            let rangeTransactions = filteredTransactions;
+            if (dateFrom || dateTo) {
+                rangeTransactions = filteredTransactions.filter(t => {
+                    if (dateFrom && t.date < dateFrom) return false;
+                    if (dateTo && t.date > dateTo) return false;
+                    return true;
+                });
+            }
+
+            // Group by month
+            const monthlyData = {};
+
+            rangeTransactions.forEach(t => {
+                const date = new Date(t.date);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                const monthName = date.toLocaleDateString('it-IT', { year: 'numeric', month: 'long' });
+
+                if (!monthlyData[monthKey]) {
+                    monthlyData[monthKey] = {
+                        name: monthName,
+                        income: 0,
+                        expenses: 0,
+                        transactions: 0
+                    };
+                }
+
+                monthlyData[monthKey].transactions++;
+                if (t.type === 'income') {
+                    monthlyData[monthKey].income += t.amount;
+                } else {
+                    monthlyData[monthKey].expenses += t.amount;
+                }
+            });
+
+            // Sort by month descending
+            const sortedMonths = Object.entries(monthlyData)
+                .sort((a, b) => b[0].localeCompare(a[0]));
+
+            if (sortedMonths.length === 0) {
+                contentEl.innerHTML = `
+                    <div class="empty-state" style="padding: 32px;">
+                        <div class="icon">📊</div>
+                        <p>Nessun dato disponibile per il periodo selezionato</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Generate HTML for each month
+            contentEl.innerHTML = sortedMonths.map(([key, data]) => {
+                const balance = data.income - data.expenses;
+                const balanceClass = balance >= 0 ? 'green' : '';
+                const balanceColor = balance >= 0 ? 'var(--success)' : 'var(--danger)';
+
+                return `
+                    <div style="background: var(--background); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h3 style="font-size: 16px; font-weight: 600; text-transform: capitalize;">${data.name}</h3>
+                            <span style="font-size: 13px; color: var(--text-light);">${data.transactions} transazioni</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                            <div>
+                                <div style="font-size: 12px; color: var(--text-light); margin-bottom: 4px;">Entrate</div>
+                                <div style="font-size: 18px; font-weight: 600; color: var(--success);">+${formatCurrency(data.income)}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: var(--text-light); margin-bottom: 4px;">Spese</div>
+                                <div style="font-size: 18px; font-weight: 600; color: var(--danger);">-${formatCurrency(data.expenses)}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: var(--text-light); margin-bottom: 4px;">Bilancio</div>
+                                <div style="font-size: 18px; font-weight: 600; color: ${balanceColor};">${formatCurrency(balance)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /**
+         * Update dashboard date range and refresh UI
+         */
+        function updateDashboardDateRange() {
+            // This will use the dashboard date filters to update the breakdown
+            updateMonthlyBreakdown();
+        }
+
+        /**
          * Update footer based on subscription status
          */
         function updateFooter() {
@@ -2348,6 +2474,66 @@
                     `;
                 }
             }
+        }
+
+        // ========== EXPORT FUNCTIONS ==========
+
+        /**
+         * Export filtered transactions to CSV
+         */
+        function exportToCSV() {
+            if (filteredTransactions.length === 0) {
+                alert('Nessuna transazione da esportare. Aggiungi transazioni o modifica i filtri.');
+                return;
+            }
+
+            // Check if user has subscription for export (optional: can be free feature)
+            // For now, making it a free feature to be generous
+
+            // Create CSV header
+            const headers = ['Data', 'Tipo', 'Categoria', 'Descrizione', 'Importo', 'Ricorrente'];
+
+            // Create CSV rows
+            const rows = filteredTransactions.map(t => {
+                return [
+                    t.date,
+                    t.type === 'income' ? 'Entrata' : 'Spesa',
+                    t.category,
+                    `"${t.description.replace(/"/g, '""')}"`, // Escape quotes
+                    t.amount.toFixed(2),
+                    t.recurring ? 'Sì' : 'No'
+                ];
+            });
+
+            // Combine header and rows
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(row => row.join(','))
+            ].join('\n');
+
+            // Add BOM for Excel UTF-8 support
+            const BOM = '\uFEFF';
+            const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+
+            // Create download link
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+
+            // Generate filename with current date
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const filename = `expense-tracker-${dateStr}.csv`;
+
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Show success message
+            alert(`✅ Esportate ${filteredTransactions.length} transazioni in ${filename}`);
         }
 
         // ========== UTILITY FUNCTIONS ==========
