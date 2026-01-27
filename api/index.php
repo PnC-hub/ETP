@@ -102,7 +102,7 @@ try {
 
             if ($action === 'create-checkout' && $method === 'POST') {
                 require_once __DIR__ . '/payments/create-checkout.php';
-            } elseif ($action === 'portal' && $method === 'GET') {
+            } elseif ($action === 'portal' && $method === 'POST') {
                 require_once __DIR__ . '/payments/portal.php';
             } else {
                 Response::error('Endpoint not found', 404);

@@ -17,12 +17,13 @@ define('JWT_SECRET', 'etp_jwt_secret_2025_xK9mP3nQ7rT2wY5v_unique_for_etp');
 define('JWT_ALGORITHM', 'HS256');
 define('JWT_EXPIRY_DAYS', 30);
 
-// Stripe Configuration (will be populated later)
-define('STRIPE_SECRET_KEY_TEST', ''); // To be set in Story #10
-define('STRIPE_SECRET_KEY_LIVE', ''); // To be set in Story #10
-define('STRIPE_WEBHOOK_SECRET', ''); // To be set in Story #12
-define('STRIPE_PRICE_ID_MONTHLY', ''); // To be set in Story #10
-define('STRIPE_PRICE_ID_YEARLY', ''); // To be set in Story #10
+// Stripe Configuration
+// TEST KEYS - Replace with actual keys from Stripe Dashboard
+define('STRIPE_SECRET_KEY_TEST', 'sk_test_51xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'); // Replace with actual test key
+define('STRIPE_SECRET_KEY_LIVE', ''); // To be set before production
+define('STRIPE_WEBHOOK_SECRET', ''); // To be set after webhook creation
+define('STRIPE_PRICE_ID_MONTHLY', 'price_xxxxxxxxxxxxx'); // Replace with actual price ID for monthly plan
+define('STRIPE_PRICE_ID_YEARLY', 'price_xxxxxxxxxxxxx'); // Replace with actual price ID for yearly plan
 
 // Environment
 define('ENVIRONMENT', 'development'); // change to 'production' when live

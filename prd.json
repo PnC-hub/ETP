@@ -70,7 +70,7 @@
       "id": 4,
       "title": "Stripe Integration Setup",
       "description": "Configure Stripe SDK and create subscription checkout flow",
-      "status": "pending",
+      "status": "completed",
       "tasks": [
         "Install Stripe PHP library (composer require stripe/stripe-php)",
         "Add Stripe keys to config.php (test keys for now)",
