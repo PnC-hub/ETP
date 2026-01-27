@@ -163,7 +163,7 @@
       "id": 10,
       "title": "Frontend Transaction Management",
       "description": "Build the main transaction UI with add/edit/delete/filter",
-      "status": "pending",
+      "status": "completed",
       "tasks": [
         "Create transaction list display",
         "Implement add transaction form",

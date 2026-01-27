@@ -241,6 +241,18 @@
             font-size: 12px;
         }
 
+        .btn-edit {
+            background: rgba(32, 140, 141, 0.1);
+            color: var(--primary);
+            font-size: 13px;
+            padding: 8px 16px;
+        }
+
+        .btn-edit:hover {
+            background: var(--primary);
+            color: white;
+        }
+
         /* ========== SAVINGS ALERT ========== */
         .savings-section {
             background: linear-gradient(135deg, rgba(32, 140, 141, 0.08) 0%, rgba(32, 140, 141, 0.03) 100%);
@@ -412,6 +424,14 @@
             font-weight: 600;
             color: var(--text);
             white-space: nowrap;
+        }
+
+        .transaction-amount.income {
+            color: var(--success);
+        }
+
+        .transaction-amount.expense {
+            color: var(--danger);
         }
 
         .transaction-actions {
@@ -1017,69 +1037,91 @@
         </div>
 
         <!-- STATS CARDS -->
-        <section class="stats-grid">
+        <section class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
             <div class="card">
                 <div class="stat-card">
-                    <div class="stat-icon blue">💳</div>
+                    <div class="stat-icon green">💰</div>
                     <div class="stat-content">
-                        <h3 id="totalMonth">€0.00</h3>
+                        <h3 id="totalIncome" class="green">€0.00</h3>
+                        <p>Entrate questo mese</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="stat-card">
+                    <div class="stat-icon orange">💸</div>
+                    <div class="stat-content">
+                        <h3 id="totalExpenses">€0.00</h3>
                         <p>Spese questo mese</p>
                     </div>
                 </div>
             </div>
             <div class="card">
                 <div class="stat-card">
-                    <div class="stat-icon orange">📊</div>
+                    <div class="stat-icon blue">💼</div>
                     <div class="stat-content">
-                        <h3 id="avgDaily">€0.00</h3>
-                        <p>Media al giorno</p>
+                        <h3 id="totalBalance" class="green">€0.00</h3>
+                        <p>Bilancio</p>
                     </div>
                 </div>
             </div>
             <div class="card">
                 <div class="stat-card">
-                    <div class="stat-icon green">✨</div>
+                    <div class="stat-icon blue">📊</div>
                     <div class="stat-content">
-                        <h3 id="totalSavings" class="green">€0.00</h3>
-                        <p>Potenziale risparmio</p>
+                        <h3 id="avgDaily">€0.00</h3>
+                        <p>Media spesa giornaliera</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ADD EXPENSE FORM -->
+        <!-- ADD TRANSACTION FORM -->
         <section class="card form-section">
-            <h2 class="card-title">➕ Aggiungi una spesa</h2>
+            <h2 class="card-title">➕ <span id="formTitle">Aggiungi una transazione</span></h2>
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="expenseDate">Data</label>
-                    <input type="date" id="expenseDate" required>
+                    <label for="transactionType">Tipo</label>
+                    <select id="transactionType" required>
+                        <option value="expense">💸 Spesa</option>
+                        <option value="income">💰 Entrata</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label for="expenseAmount">Importo (€)</label>
-                    <input type="number" id="expenseAmount" step="0.01" min="0" placeholder="0.00" required>
+                    <label for="transactionDate">Data</label>
+                    <input type="date" id="transactionDate" required>
                 </div>
                 <div class="form-group">
-                    <label for="expenseCategory">Categoria</label>
-                    <select id="expenseCategory" required>
+                    <label for="transactionAmount">Importo (€)</label>
+                    <input type="number" id="transactionAmount" step="0.01" min="0" placeholder="0.00" required>
+                </div>
+                <div class="form-group">
+                    <label for="transactionCategory">Categoria</label>
+                    <select id="transactionCategory" required>
                         <option value="Cibo">🍔 Cibo</option>
                         <option value="Trasporto">🚗 Trasporto</option>
                         <option value="Abbonamenti">🔔 Abbonamenti</option>
                         <option value="Intrattenimento">🎬 Intrattenimento</option>
                         <option value="Utility">💡 Utility</option>
+                        <option value="Stipendio">💼 Stipendio</option>
+                        <option value="Freelance">💻 Freelance</option>
                         <option value="Altro">📦 Altro</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="expenseDescription">Descrizione</label>
-                    <input type="text" id="expenseDescription" placeholder="Es. Netflix, Spesa Coop...">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="transactionDescription">Descrizione</label>
+                    <input type="text" id="transactionDescription" placeholder="Es. Netflix, Spesa Coop, Stipendio...">
                 </div>
             </div>
             <div class="checkbox-row">
-                <input type="checkbox" id="expenseRecurring">
-                <label for="expenseRecurring">Ricorrente ogni mese?</label>
+                <input type="checkbox" id="transactionRecurring">
+                <label for="transactionRecurring">Ricorrente ogni mese?</label>
             </div>
-            <button class="btn btn-primary" onclick="addExpense()">💾 Aggiungi Spesa</button>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-primary" onclick="saveTransaction()" id="saveBtn">💾 Aggiungi Transazione</button>
+                <button class="btn btn-outline hidden" onclick="cancelEdit()" id="cancelBtn">Annulla</button>
+            </div>
+            <input type="hidden" id="editingId" value="">
         </section>
 
         <!-- SAVINGS ALERT -->
@@ -1111,16 +1153,57 @@
             </div>
         </section>
 
+        <!-- FILTERS -->
+        <section class="card">
+            <h2 class="card-title">🔍 Filtri</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="filterDateFrom">Data da</label>
+                    <input type="date" id="filterDateFrom">
+                </div>
+                <div class="form-group">
+                    <label for="filterDateTo">Data a</label>
+                    <input type="date" id="filterDateTo">
+                </div>
+                <div class="form-group">
+                    <label for="filterType">Tipo</label>
+                    <select id="filterType">
+                        <option value="all">Tutti</option>
+                        <option value="expense">Solo Spese</option>
+                        <option value="income">Solo Entrate</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filterCategory">Categoria</label>
+                    <select id="filterCategory">
+                        <option value="all">Tutte</option>
+                        <option value="Cibo">🍔 Cibo</option>
+                        <option value="Trasporto">🚗 Trasporto</option>
+                        <option value="Abbonamenti">🔔 Abbonamenti</option>
+                        <option value="Intrattenimento">🎬 Intrattenimento</option>
+                        <option value="Utility">💡 Utility</option>
+                        <option value="Stipendio">💼 Stipendio</option>
+                        <option value="Freelance">💻 Freelance</option>
+                        <option value="Altro">📦 Altro</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 16px;">
+                <button class="btn btn-primary" onclick="applyFilters()">Applica Filtri</button>
+                <button class="btn btn-outline" onclick="resetFilters()">Reset</button>
+            </div>
+        </section>
+
         <!-- TRANSACTIONS LIST -->
         <section class="card">
             <div class="transactions-header">
-                <h2 class="card-title" style="margin-bottom: 0;">💳 Ultime Transazioni</h2>
-                <button class="btn btn-danger" onclick="clearAllExpenses()">Cancella tutto</button>
+                <h2 class="card-title" style="margin-bottom: 0;">💳 Transazioni (<span id="transactionCount">0</span>)</h2>
+                <button class="btn btn-danger" onclick="clearAllTransactions()">Cancella tutto</button>
             </div>
             <div id="transactionsList" class="transaction-list">
                 <div class="empty-state">
                     <div class="icon">📭</div>
-                    <p>Nessuna transazione. Inizia ad aggiungere le tue spese!</p>
+                    <p>Nessuna transazione. Inizia ad aggiungere le tue transazioni!</p>
                 </div>
             </div>
         </section>
@@ -1142,7 +1225,8 @@
         let subscriptionStatus = null;
 
         // ========== DATA & CONFIG ==========
-        let expenses = [];
+        let transactions = [];
+        let filteredTransactions = [];
         let categoryChart = null;
         let weekChart = null;
 
@@ -1154,6 +1238,8 @@
             'Abbonamenti': '🔔',
             'Intrattenimento': '🎬',
             'Utility': '💡',
+            'Stipendio': '💼',
+            'Freelance': '💻',
             'Altro': '📦'
         };
 
@@ -1163,6 +1249,8 @@
             'Abbonamenti': '#a855f7',
             'Intrattenimento': '#ec4899',
             'Utility': '#eab308',
+            'Stipendio': '#10b981',
+            'Freelance': '#8b5cf6',
             'Altro': '#6b7280'
         };
 
@@ -1172,6 +1260,8 @@
             'Abbonamenti': 'cat-abbonamenti',
             'Intrattenimento': 'cat-intrattenimento',
             'Utility': 'cat-utility',
+            'Stipendio': 'cat-cibo',
+            'Freelance': 'cat-abbonamenti',
             'Altro': 'cat-altro'
         };
 
@@ -1182,16 +1272,30 @@
 
             // Set date to today
             const today = new Date().toISOString().split('T')[0];
-            const dateInput = document.getElementById('expenseDate');
+            const dateInput = document.getElementById('transactionDate');
             if (dateInput) {
                 dateInput.value = today;
             }
 
-            // Load expenses from localStorage
-            const saved = localStorage.getItem('expenses');
+            // Load transactions from localStorage
+            const saved = localStorage.getItem('transactions');
             if (saved) {
-                expenses = JSON.parse(saved);
+                transactions = JSON.parse(saved);
+            } else {
+                // Migrate old expenses to transactions
+                const oldExpenses = localStorage.getItem('expenses');
+                if (oldExpenses) {
+                    const expenses = JSON.parse(oldExpenses);
+                    transactions = expenses.map(e => ({
+                        ...e,
+                        type: 'expense' // All old entries are expenses
+                    }));
+                    saveTransactions();
+                }
             }
+
+            // Initialize filtered transactions
+            filteredTransactions = transactions;
 
             // Render UI if logged in
             if (authToken) {
@@ -1201,14 +1305,20 @@
             }
 
             // Enter key on description field
-            const descInput = document.getElementById('expenseDescription');
+            const descInput = document.getElementById('transactionDescription');
             if (descInput) {
                 descInput.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
-                        addExpense();
+                        saveTransaction();
                     }
                 });
             }
+
+            // Filter change listeners
+            document.getElementById('filterDateFrom').addEventListener('change', applyFilters);
+            document.getElementById('filterDateTo').addEventListener('change', applyFilters);
+            document.getElementById('filterType').addEventListener('change', applyFilters);
+            document.getElementById('filterCategory').addEventListener('change', applyFilters);
 
             // Handle Stripe redirect return
             handleStripeReturn();
@@ -1687,31 +1797,22 @@
             }
         }
 
-        /**
-         * Check if user can add more expenses
-         */
-        function canAddExpense() {
-            // If has active subscription, unlimited
-            if (subscriptionStatus && subscriptionStatus.is_active === true) {
-                return true;
-            }
-
-            // Free plan: check limit
-            return expenses.length < FREE_LIMIT;
-        }
 
         // ========== CORE FUNCTIONS ==========
 
         /**
-         * Add a new expense
+         * Save or update a transaction
          */
-        function addExpense() {
-            const dateInput = document.getElementById('expenseDate');
-            const amountInput = document.getElementById('expenseAmount');
-            const categoryInput = document.getElementById('expenseCategory');
-            const descriptionInput = document.getElementById('expenseDescription');
-            const recurringInput = document.getElementById('expenseRecurring');
+        function saveTransaction() {
+            const typeInput = document.getElementById('transactionType');
+            const dateInput = document.getElementById('transactionDate');
+            const amountInput = document.getElementById('transactionAmount');
+            const categoryInput = document.getElementById('transactionCategory');
+            const descriptionInput = document.getElementById('transactionDescription');
+            const recurringInput = document.getElementById('transactionRecurring');
+            const editingId = document.getElementById('editingId');
 
+            const type = typeInput.value;
             const date = dateInput.value;
             const amount = parseFloat(amountInput.value);
             const category = categoryInput.value;
@@ -1729,68 +1830,184 @@
                 return;
             }
 
-            // Check if user can add more expenses
-            if (!canAddExpense()) {
-                // Show subscription modal instead of alert
-                showSubscriptionModal();
-                return;
+            // Check if editing existing transaction
+            if (editingId.value) {
+                // Update existing
+                const id = parseInt(editingId.value);
+                const index = transactions.findIndex(t => t.id === id);
+                if (index !== -1) {
+                    transactions[index] = {
+                        ...transactions[index],
+                        type: type,
+                        date: date,
+                        amount: amount,
+                        category: category,
+                        description: description,
+                        recurring: recurring
+                    };
+                }
+                editingId.value = '';
+            } else {
+                // Check if user can add more transactions
+                if (!canAddTransaction()) {
+                    showSubscriptionModal();
+                    return;
+                }
+
+                // Create new transaction
+                const transaction = {
+                    id: Date.now(),
+                    type: type,
+                    date: date,
+                    amount: amount,
+                    category: category,
+                    description: description,
+                    recurring: recurring,
+                    timestamp: Date.now()
+                };
+
+                transactions.push(transaction);
             }
 
-            // Create expense object
-            const expense = {
-                id: Date.now(),
-                date: date,
-                amount: amount,
-                category: category,
-                description: description,
-                recurring: recurring,
-                timestamp: Date.now()
-            };
-
-            // Add to array
-            expenses.push(expense);
-
-            // Save to localStorage
-            saveExpenses();
-
-            // Update UI
-            renderUI();
+            // Save and refresh
+            saveTransactions();
+            applyFilters();
 
             // Clear form
-            amountInput.value = '';
-            descriptionInput.value = '';
-            recurringInput.checked = false;
-            dateInput.value = new Date().toISOString().split('T')[0];
+            clearForm();
 
             // Focus on amount for next entry
             amountInput.focus();
         }
 
         /**
-         * Delete a single expense
+         * Edit a transaction
          */
-        function deleteExpense(id) {
-            expenses = expenses.filter(e => e.id !== id);
-            saveExpenses();
-            renderUI();
+        function editTransaction(id) {
+            const transaction = transactions.find(t => t.id === id);
+            if (!transaction) return;
+
+            // Populate form
+            document.getElementById('transactionType').value = transaction.type || 'expense';
+            document.getElementById('transactionDate').value = transaction.date;
+            document.getElementById('transactionAmount').value = transaction.amount;
+            document.getElementById('transactionCategory').value = transaction.category;
+            document.getElementById('transactionDescription').value = transaction.description;
+            document.getElementById('transactionRecurring').checked = transaction.recurring || false;
+            document.getElementById('editingId').value = id;
+
+            // Update UI
+            document.getElementById('formTitle').textContent = 'Modifica transazione';
+            document.getElementById('saveBtn').textContent = '💾 Salva Modifiche';
+            document.getElementById('cancelBtn').classList.remove('hidden');
+
+            // Scroll to form
+            document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
         }
 
         /**
-         * Clear all expenses
+         * Cancel edit mode
          */
-        function clearAllExpenses() {
-            if (confirm('Sei sicuro? Questa azione non puo essere annullata.')) {
-                expenses = [];
-                localStorage.removeItem('expenses');
+        function cancelEdit() {
+            clearForm();
+        }
+
+        /**
+         * Clear form and reset edit mode
+         */
+        function clearForm() {
+            document.getElementById('transactionType').value = 'expense';
+            document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('transactionAmount').value = '';
+            document.getElementById('transactionCategory').value = 'Cibo';
+            document.getElementById('transactionDescription').value = '';
+            document.getElementById('transactionRecurring').checked = false;
+            document.getElementById('editingId').value = '';
+            document.getElementById('formTitle').textContent = 'Aggiungi una transazione';
+            document.getElementById('saveBtn').textContent = '💾 Aggiungi Transazione';
+            document.getElementById('cancelBtn').classList.add('hidden');
+        }
+
+        /**
+         * Delete a single transaction
+         */
+        function deleteTransaction(id) {
+            if (confirm('Sei sicuro di voler eliminare questa transazione?')) {
+                transactions = transactions.filter(t => t.id !== id);
+                saveTransactions();
+                applyFilters();
+            }
+        }
+
+        /**
+         * Clear all transactions
+         */
+        function clearAllTransactions() {
+            if (confirm('Sei sicuro? Questa azione eliminerà TUTTE le transazioni e non può essere annullata.')) {
+                transactions = [];
+                filteredTransactions = [];
+                localStorage.removeItem('transactions');
                 renderUI();
             }
         }
 
         /**
-         * Save expenses to localStorage
+         * Save transactions to localStorage
          */
-        function saveExpenses() {
-            localStorage.setItem('expenses', JSON.stringify(expenses));
+        function saveTransactions() {
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+        }
+
+        /**
+         * Check if user can add more transactions
+         */
+        function canAddTransaction() {
+            // If has active subscription, unlimited
+            if (subscriptionStatus && subscriptionStatus.is_active === true) {
+                return true;
+            }
+
+            // Free plan: check limit
+            return transactions.length < FREE_LIMIT;
+        }
+
+        /**
+         * Apply filters to transactions
+         */
+        function applyFilters() {
+            const dateFrom = document.getElementById('filterDateFrom').value;
+            const dateTo = document.getElementById('filterDateTo').value;
+            const type = document.getElementById('filterType').value;
+            const category = document.getElementById('filterCategory').value;
+
+            filteredTransactions = transactions.filter(t => {
+                // Date from filter
+                if (dateFrom && t.date < dateFrom) return false;
+
+                // Date to filter
+                if (dateTo && t.date > dateTo) return false;
+
+                // Type filter
+                if (type !== 'all' && t.type !== type) return false;
+
+                // Category filter
+                if (category !== 'all' && t.category !== category) return false;
+
+                return true;
+            });
+
+            renderUI();
+        }
+
+        /**
+         * Reset all filters
+         */
+        function resetFilters() {
+            document.getElementById('filterDateFrom').value = '';
+            document.getElementById('filterDateTo').value = '';
+            document.getElementById('filterType').value = 'all';
+            document.getElementById('filterCategory').value = 'all';
+            applyFilters();
         }
 
         /**
@@ -1814,21 +2031,42 @@
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
 
-            // Filter this month's expenses
-            const monthExpenses = expenses.filter(e => {
-                const expenseDate = new Date(e.date);
-                return expenseDate.getMonth() === currentMonth &&
-                       expenseDate.getFullYear() === currentYear;
+            // Filter this month's transactions
+            const monthTransactions = filteredTransactions.filter(t => {
+                const transDate = new Date(t.date);
+                return transDate.getMonth() === currentMonth &&
+                       transDate.getFullYear() === currentYear;
             });
 
-            // Total this month
-            const total = monthExpenses.reduce((sum, e) => sum + e.amount, 0);
-            document.getElementById('totalMonth').textContent = formatCurrency(total);
+            // Calculate income and expenses
+            const income = monthTransactions
+                .filter(t => t.type === 'income')
+                .reduce((sum, t) => sum + t.amount, 0);
 
-            // Average per day (unique days with transactions)
-            const uniqueDays = new Set(monthExpenses.map(e => e.date)).size;
-            const avg = uniqueDays > 0 ? total / uniqueDays : 0;
-            document.getElementById('avgDaily').textContent = formatCurrency(avg);
+            const expenses = monthTransactions
+                .filter(t => t.type === 'expense')
+                .reduce((sum, t) => sum + t.amount, 0);
+
+            const balance = income - expenses;
+
+            // Update UI
+            document.getElementById('totalIncome').textContent = formatCurrency(income);
+            document.getElementById('totalExpenses').textContent = formatCurrency(expenses);
+            document.getElementById('totalBalance').textContent = formatCurrency(balance);
+
+            // Update balance color
+            const balanceEl = document.getElementById('totalBalance');
+            balanceEl.classList.remove('green');
+            balanceEl.style.color = balance >= 0 ? 'var(--success)' : 'var(--danger)';
+
+            // Average expenses per day (only expense days)
+            const expenseDays = new Set(
+                monthTransactions
+                    .filter(t => t.type === 'expense')
+                    .map(t => t.date)
+            ).size;
+            const avgExpense = expenseDays > 0 ? expenses / expenseDays : 0;
+            document.getElementById('avgDaily').textContent = formatCurrency(avgExpense);
         }
 
         /**
@@ -1836,38 +2074,45 @@
          */
         function updateTransactions() {
             const listEl = document.getElementById('transactionsList');
+            const countEl = document.getElementById('transactionCount');
 
-            if (expenses.length === 0) {
+            // Update count
+            countEl.textContent = filteredTransactions.length;
+
+            if (filteredTransactions.length === 0) {
                 listEl.innerHTML = `
                     <div class="empty-state">
                         <div class="icon">📭</div>
-                        <p>Nessuna transazione. Inizia ad aggiungere le tue spese!</p>
+                        <p>Nessuna transazione trovata. ${transactions.length > 0 ? 'Prova a modificare i filtri.' : 'Inizia ad aggiungere le tue transazioni!'}</p>
                     </div>
                 `;
                 return;
             }
 
-            // Sort by date descending, take last 15
-            const sorted = [...expenses]
-                .sort((a, b) => new Date(b.date) - new Date(a.date))
-                .slice(0, 15);
+            // Sort by date descending
+            const sorted = [...filteredTransactions]
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            listEl.innerHTML = sorted.map(expense => {
-                const emoji = categoryEmojis[expense.category] || '📦';
-                const cssClass = categoryCssClasses[expense.category] || 'cat-altro';
-                const formattedDate = formatDate(expense.date);
-                const recurringBadge = expense.recurring ? '<span class="recurring-badge">🔁</span>' : '';
+            listEl.innerHTML = sorted.map(transaction => {
+                const emoji = categoryEmojis[transaction.category] || '📦';
+                const cssClass = categoryCssClasses[transaction.category] || 'cat-altro';
+                const formattedDate = formatDate(transaction.date);
+                const recurringBadge = transaction.recurring ? '<span class="recurring-badge">🔁</span>' : '';
+                const type = transaction.type || 'expense';
+                const typeClass = type === 'income' ? 'income' : 'expense';
+                const sign = type === 'income' ? '+' : '-';
 
                 return `
                     <div class="transaction-item">
                         <div class="transaction-icon ${cssClass}">${emoji}</div>
                         <div class="transaction-details">
-                            <h4>${escapeHtml(expense.description)}</h4>
+                            <h4>${escapeHtml(transaction.description)}</h4>
                             <p>${formattedDate} ${recurringBadge}</p>
                         </div>
-                        <div class="transaction-amount">${formatCurrency(expense.amount)}</div>
+                        <div class="transaction-amount ${typeClass}">${sign}${formatCurrency(transaction.amount)}</div>
                         <div class="transaction-actions">
-                            <button class="btn btn-danger btn-small" onclick="deleteExpense(${expense.id})">Elimina</button>
+                            <button class="btn btn-edit btn-small" onclick="editTransaction(${transaction.id})">Modifica</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteTransaction(${transaction.id})">Elimina</button>
                         </div>
                     </div>
                 `;
@@ -1886,15 +2131,16 @@
          * Update category doughnut chart
          */
         function updateCategoryChart() {
-            // Aggregate by category
+            // Aggregate by category (only expenses)
             const categoryTotals = {};
             Object.keys(categoryEmojis).forEach(cat => {
                 categoryTotals[cat] = 0;
             });
 
-            expenses.forEach(e => {
-                if (categoryTotals[e.category] !== undefined) {
-                    categoryTotals[e.category] += e.amount;
+            filteredTransactions.forEach(t => {
+                // Only count expenses for category chart
+                if (t.type === 'expense' && categoryTotals[t.category] !== undefined) {
+                    categoryTotals[t.category] += t.amount;
                 }
             });
 
@@ -1941,6 +2187,7 @@
             // Update category stats grid
             const statsEl = document.getElementById('categoryStats');
             const sorted = Object.entries(categoryTotals)
+                .filter(([_, amount]) => amount > 0)
                 .sort((a, b) => b[1] - a[1]);
 
             statsEl.innerHTML = sorted.map(([cat, amount]) => `
@@ -1969,13 +2216,13 @@
                 dayLabels.push(`${dayNames[date.getDay()]} ${date.getDate()}`);
             }
 
-            // Aggregate expenses by day
+            // Aggregate expenses by day (only expenses, not income)
             const dayTotals = {};
             days.forEach(d => dayTotals[d] = 0);
 
-            expenses.forEach(e => {
-                if (dayTotals[e.date] !== undefined) {
-                    dayTotals[e.date] += e.amount;
+            filteredTransactions.forEach(t => {
+                if (t.type === 'expense' && dayTotals[t.date] !== undefined) {
+                    dayTotals[t.date] += t.amount;
                 }
             });
 
@@ -2035,14 +2282,13 @@
          * Update savings section
          */
         function updateSavings() {
-            // Filter recurring subscriptions
-            const subscriptions = expenses.filter(e =>
-                e.recurring && e.category === 'Abbonamenti'
+            // Filter recurring subscriptions (only expenses)
+            const subscriptions = filteredTransactions.filter(t =>
+                t.type === 'expense' && t.recurring && t.category === 'Abbonamenti'
             );
 
             // Calculate total potential savings
-            const total = subscriptions.reduce((sum, e) => sum + e.amount, 0);
-            document.getElementById('totalSavings').textContent = formatCurrency(total);
+            const total = subscriptions.reduce((sum, t) => sum + t.amount, 0);
 
             const section = document.getElementById('savingsSection');
             const countEl = document.getElementById('subscriptionCount');
@@ -2079,12 +2325,12 @@
                 `;
             } else {
                 // Free user - show usage
-                const remaining = FREE_LIMIT - expenses.length;
-                const usagePercent = Math.min((expenses.length / FREE_LIMIT) * 100, 100);
+                const remaining = FREE_LIMIT - transactions.length;
+                const usagePercent = Math.min((transactions.length / FREE_LIMIT) * 100, 100);
 
                 if (remaining <= 10 && remaining > 0) {
                     footerTip.innerHTML = `
-                        ⚠️ <strong>Attenzione:</strong> Ti restano solo ${remaining} spese.
+                        ⚠️ <strong>Attenzione:</strong> Ti restano solo ${remaining} transazioni.
                         <a href="javascript:showSubscriptionModal()" style="color: var(--primary); text-decoration: underline; font-weight: bold;">Passa a PRO</a>
                         per tracking illimitato (€6.99/mese)!
                     `;
@@ -2092,11 +2338,11 @@
                     footerTip.innerHTML = `
                         🚫 <strong>Limite raggiunto!</strong>
                         <a href="javascript:showSubscriptionModal()" style="color: var(--primary); text-decoration: underline; font-weight: bold;">Passa a PRO ora</a>
-                        per continuare a tracciare le tue spese!
+                        per continuare a tracciare le tue transazioni!
                     `;
                 } else {
                     footerTip.innerHTML = `
-                        💡 <strong>Consiglio:</strong> Hai usato ${expenses.length}/${FREE_LIMIT} spese gratuite.
+                        💡 <strong>Consiglio:</strong> Hai usato ${transactions.length}/${FREE_LIMIT} transazioni gratuite.
                         <a href="javascript:showSubscriptionModal()" style="color: var(--primary); text-decoration: underline;">Passa a PRO</a>
                         per tracking illimitato + insights avanzati!
                     `;

@@ -672,3 +672,119 @@ Transform from localStorage app to full SaaS with backend, auth, and Stripe paym
 
 ---
 
+### [2026-01-27] Story #10: Frontend Transaction Management ✓
+**Status**: COMPLETED
+**Commit**: [pending]
+
+**What was implemented:**
+- Transformed expense tracking into full transaction management (income + expenses)
+- Updated add form to support both transaction types (income/expense dropdown)
+- Added comprehensive edit functionality with inline form population
+- Implemented advanced filtering system with date range, type, and category filters
+- Created real-time filter application with automatic UI updates
+- Enhanced transaction list display with edit/delete buttons for each item
+- Updated stats cards to show Income, Expenses, Balance, and Average Daily Spend
+- Implemented balance calculation with positive/negative color coding
+- Added transaction count display in list header
+- Created migration logic from old "expenses" localStorage format to "transactions"
+- Expanded category list with income categories (Stipendio, Freelance)
+- Updated all charts to use filtered transactions (respects active filters)
+- Enhanced UI with color-coded amounts (green for income, red for expenses)
+- Added form validation for all transaction fields
+- Implemented cancel edit button to exit edit mode
+
+**Key Learnings:**
+1. Migrated from single array "expenses" to dual-state system: "transactions" (all data) + "filteredTransactions" (displayed data)
+2. Edit mode uses hidden field (editingId) to track which transaction is being edited
+3. Filter application updates filteredTransactions then calls renderUI() to refresh all UI components
+4. Stats calculation works on filteredTransactions to reflect current view (not all data)
+5. Form supports both CREATE and UPDATE modes via saveTransaction() function
+6. Real-time filter updates improve UX (change listeners on all filter inputs)
+7. Transaction type (income/expense) affects amount display color and sign (+/-)
+8. Balance card uses dynamic color: green for positive, red for negative balance
+9. Reset filters button restores default state (all transactions visible)
+10. Category chart only shows expenses (not income) to maintain meaningful visualization
+
+**UI Components Modified:**
+- Transaction form: Added type dropdown, renamed from "expense" to "transaction"
+- Stats grid: Changed from 3 to 4 cards (Income, Expenses, Balance, Avg Daily)
+- Filters section: New section with date range, type, and category filters
+- Transaction list: Added edit button alongside delete, shows transaction count
+- Form buttons: Added cancel button (hidden until edit mode)
+- Amount display: Color-coded based on transaction type
+
+**JavaScript Functions Added/Modified:**
+- saveTransaction(): Handles both create and update operations
+- editTransaction(id): Populates form with transaction data for editing
+- cancelEdit(): Clears form and exits edit mode
+- clearForm(): Resets all form fields to default values
+- deleteTransaction(id): Confirmation dialog before deletion
+- clearAllTransactions(): Bulk delete with confirmation
+- canAddTransaction(): Renamed from canAddExpense, checks subscription limits
+- applyFilters(): Filters transactions based on date/type/category
+- resetFilters(): Clears all filters and shows all transactions
+- updateStats(): Calculates income, expenses, balance from filtered data
+- updateTransactions(): Renders filtered transaction list with edit/delete buttons
+- updateCategoryChart(): Only includes expenses in chart (filtered)
+- updateWeekChart(): Only includes expenses in chart (filtered)
+- updateSavings(): Works with filtered transactions
+- updateFooter(): Updated to reference "transactions" instead of "expenses"
+
+**Data Structure Changes:**
+- Global variables: transactions (all), filteredTransactions (view)
+- Transaction object: Added "type" field ('income' or 'expense')
+- localStorage: Migrated from "expenses" to "transactions" key
+- Migration: Old expenses auto-converted to transactions with type='expense'
+
+**Filter System:**
+- Date range: filterDateFrom, filterDateTo (inclusive)
+- Type filter: All, Only Expenses, Only Income
+- Category filter: All categories or specific category
+- Search: (not implemented in this story - reserved for Story #11)
+- Auto-apply: Filters update on input change (no need to click Apply)
+
+**Stats Calculation:**
+- Income: Sum of all income transactions in current month
+- Expenses: Sum of all expense transactions in current month
+- Balance: Income minus Expenses
+- Avg Daily Spend: Expenses divided by number of unique expense days
+
+**Category Updates:**
+- Added income categories: Stipendio (💼), Freelance (💻)
+- Maintained expense categories: Cibo, Trasporto, Abbonamenti, Intrattenimento, Utility, Altro
+- Category colors extended for new categories
+
+**Edit Mode Flow:**
+1. User clicks "Modifica" button on transaction
+2. editTransaction(id) populates form with transaction data
+3. Form title changes to "Modifica transazione"
+4. Save button text changes to "Salva Modifiche"
+5. Cancel button appears
+6. User can modify any field
+7. Clicking save updates transaction in array
+8. Clicking cancel clears form and exits edit mode
+
+**Validation:**
+- Type: Must be 'income' or 'expense'
+- Date: Required, must be valid date format
+- Amount: Required, must be positive number
+- Category: Required, must be from predefined list
+- Description: Optional, auto-filled with category if empty
+
+**Files Modified:**
+- index.html (complete transaction management UI and logic)
+- prd.json (marked story #10 as completed)
+- scripts/ralph/progress.txt (added story #10 learnings)
+
+**Testing:**
+- Verified all functions defined (saveTransaction, editTransaction, deleteTransaction, etc.)
+- Verified no references to old function names (addExpense, deleteExpense, etc.)
+- Verified localStorage migration from "expenses" to "transactions"
+- Verified filter application updates filteredTransactions correctly
+- Verified stats calculation uses filtered data
+- Verified edit mode populates form and saves changes
+
+**Next Story:** #11 - Frontend Export & Dashboard
+
+---
+
