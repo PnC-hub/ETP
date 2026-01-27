@@ -117,7 +117,7 @@
       "id": 7,
       "title": "Data Export Feature",
       "description": "Allow users to export their transactions to CSV format",
-      "status": "pending",
+      "status": "completed",
       "tasks": [
         "Create transactions/export.php endpoint",
         "Generate CSV with proper headers",
