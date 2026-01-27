@@ -132,7 +132,7 @@
       "id": 8,
       "title": "Frontend Authentication UI",
       "description": "Update index.html with login/register forms and token management",
-      "status": "pending",
+      "status": "completed",
       "tasks": [
         "Add login form HTML",
         "Add registration form HTML",

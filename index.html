@@ -461,6 +461,233 @@
         .cat-utility { background: rgba(234, 179, 8, 0.15); }
         .cat-altro { background: rgba(107, 114, 128, 0.15); }
 
+        /* ========== AUTH SECTION ========== */
+        .auth-container {
+            max-width: 440px;
+            margin: 60px auto;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 16px var(--shadow-hover);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-header h1 {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .auth-header p {
+            color: var(--text-light);
+            font-size: 15px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: var(--background);
+            padding: 4px;
+            border-radius: 10px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auth-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .auth-form-group {
+            margin-bottom: 20px;
+        }
+
+        .auth-form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .auth-form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text);
+            background: var(--surface);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .auth-form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(32, 140, 141, 0.1);
+        }
+
+        .auth-error {
+            background: var(--danger-light);
+            color: var(--danger);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .auth-error.visible {
+            display: block;
+        }
+
+        .auth-success {
+            background: rgba(32, 140, 141, 0.1);
+            color: var(--success);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .auth-success.visible {
+            display: block;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auth-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(32, 140, 141, 0.3);
+        }
+
+        .auth-btn:disabled {
+            background: var(--border);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .password-strength-bar {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .password-strength-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--danger);
+            transition: all 0.3s ease;
+        }
+
+        .password-strength-fill.weak {
+            width: 33%;
+            background: var(--danger);
+        }
+
+        .password-strength-fill.medium {
+            width: 66%;
+            background: var(--warning);
+        }
+
+        .password-strength-fill.strong {
+            width: 100%;
+            background: var(--success);
+        }
+
+        .logout-btn {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .user-email {
+            opacity: 0.9;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            flex: 1;
+        }
+
+        /* ========== VISIBILITY CONTROL ========== */
+        .hidden {
+            display: none !important;
+        }
+
         /* ========== RESPONSIVE ========== */
         @media (max-width: 768px) {
             .container {
@@ -522,15 +749,87 @@
                 align-items: flex-start;
                 gap: 4px;
             }
+
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .auth-card {
+                padding: 32px 24px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- AUTH SECTION -->
+    <div id="authSection" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Expense Tracker Pro</h1>
+                <p>Gestisci le tue spese in modo intelligente</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+                <button class="auth-tab" onclick="switchAuthTab('register')">Registrati</button>
+            </div>
+
+            <div id="authError" class="auth-error"></div>
+            <div id="authSuccess" class="auth-success"></div>
+
+            <!-- LOGIN FORM -->
+            <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
+                <div class="auth-form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required placeholder="tua@email.com">
+                </div>
+                <div class="auth-form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="auth-btn" id="loginBtn">Accedi</button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="registerForm" class="auth-form" onsubmit="handleRegister(event)">
+                <div class="auth-form-group">
+                    <label for="registerName">Nome</label>
+                    <input type="text" id="registerName" required placeholder="Mario Rossi">
+                </div>
+                <div class="auth-form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required placeholder="tua@email.com">
+                </div>
+                <div class="auth-form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" required placeholder="••••••••" oninput="checkPasswordStrength(this.value)">
+                    <div class="password-strength">
+                        <div class="password-strength-bar">
+                            <div class="password-strength-fill" id="passwordStrengthFill"></div>
+                        </div>
+                        <span id="passwordStrengthText"></span>
+                    </div>
+                </div>
+                <button type="submit" class="auth-btn" id="registerBtn">Registrati</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP (hidden until logged in) -->
+    <div id="mainApp" class="container hidden">
         <!-- HEADER -->
         <header class="header">
-            <h1>Expense Tracker Pro</h1>
-            <p>Traccia le tue spese e scopri come risparmiare</p>
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>Expense Tracker Pro</h1>
+                    <p>Traccia le tue spese e scopri come risparmiare</p>
+                </div>
+                <div class="user-info">
+                    <span class="user-email" id="userEmail"></span>
+                    <button class="logout-btn" onclick="handleLogout()">Logout</button>
+                </div>
+            </div>
         </header>
 
         <!-- STATS CARDS -->
@@ -652,6 +951,11 @@
     </div>
 
     <script>
+        // ========== GLOBAL CONFIG ==========
+        const API_BASE = '/api';
+        let authToken = null;
+        let currentUser = null;
+
         // ========== DATA & CONFIG ==========
         let expenses = [];
         let categoryChart = null;
@@ -688,9 +992,15 @@
 
         // ========== INITIALIZATION ==========
         document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already logged in
+            checkAuth();
+
             // Set date to today
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('expenseDate').value = today;
+            const dateInput = document.getElementById('expenseDate');
+            if (dateInput) {
+                dateInput.value = today;
+            }
 
             // Load expenses from localStorage
             const saved = localStorage.getItem('expenses');
@@ -698,16 +1008,350 @@
                 expenses = JSON.parse(saved);
             }
 
-            // Render UI
-            renderUI();
+            // Render UI if logged in
+            if (authToken) {
+                renderUI();
+            }
 
             // Enter key on description field
-            document.getElementById('expenseDescription').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    addExpense();
-                }
-            });
+            const descInput = document.getElementById('expenseDescription');
+            if (descInput) {
+                descInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        addExpense();
+                    }
+                });
+            }
         });
+
+        // ========== AUTH FUNCTIONS ==========
+
+        /**
+         * Check if user is authenticated
+         */
+        function checkAuth() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('currentUser');
+
+            if (token && user) {
+                authToken = token;
+                currentUser = JSON.parse(user);
+                showMainApp();
+            } else {
+                showAuthSection();
+            }
+        }
+
+        /**
+         * Switch between login and register tabs
+         */
+        function switchAuthTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const tabs = document.querySelectorAll('.auth-tab');
+
+            tabs.forEach(t => t.classList.remove('active'));
+
+            if (tab === 'login') {
+                loginForm.classList.add('active');
+                registerForm.classList.remove('active');
+                tabs[0].classList.add('active');
+            } else {
+                registerForm.classList.add('active');
+                loginForm.classList.remove('active');
+                tabs[1].classList.add('active');
+            }
+
+            hideAuthMessages();
+        }
+
+        /**
+         * Handle login form submission
+         */
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            // Validation
+            if (!validateEmail(email)) {
+                showAuthError('Inserisci un indirizzo email valido');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAuthError('La password deve essere di almeno 6 caratteri');
+                return;
+            }
+
+            // Disable button
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            btn.textContent = 'Accesso in corso...';
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Store token and user data
+                    authToken = data.data.token;
+                    currentUser = data.data.user;
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                    // Show success and redirect
+                    showAuthSuccess('Accesso effettuato! Reindirizzamento...');
+                    setTimeout(() => {
+                        showMainApp();
+                    }, 1000);
+                } else {
+                    showAuthError(data.error || 'Errore durante l\'accesso. Verifica le credenziali.');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAuthError('Errore di connessione. Riprova.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Accedi';
+            }
+        }
+
+        /**
+         * Handle register form submission
+         */
+        async function handleRegister(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+
+            // Validation
+            if (name.length < 2) {
+                showAuthError('Il nome deve essere di almeno 2 caratteri');
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                showAuthError('Inserisci un indirizzo email valido');
+                return;
+            }
+
+            const passwordValidation = validatePassword(password);
+            if (!passwordValidation.valid) {
+                showAuthError(passwordValidation.message);
+                return;
+            }
+
+            // Disable button
+            const btn = document.getElementById('registerBtn');
+            btn.disabled = true;
+            btn.textContent = 'Registrazione...';
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/register.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Show success message
+                    showAuthSuccess('Registrazione completata! Effettua il login.');
+
+                    // Clear form
+                    document.getElementById('registerForm').reset();
+                    document.getElementById('passwordStrengthFill').style.width = '0%';
+                    document.getElementById('passwordStrengthText').textContent = '';
+
+                    // Switch to login tab after 2 seconds
+                    setTimeout(() => {
+                        switchAuthTab('login');
+                        // Pre-fill email
+                        document.getElementById('loginEmail').value = email;
+                    }, 2000);
+                } else {
+                    showAuthError(data.error || 'Errore durante la registrazione. Riprova.');
+                }
+            } catch (error) {
+                console.error('Register error:', error);
+                showAuthError('Errore di connessione. Riprova.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Registrati';
+            }
+        }
+
+        /**
+         * Handle logout
+         */
+        function handleLogout() {
+            if (confirm('Sei sicuro di voler uscire?')) {
+                // Clear auth data
+                authToken = null;
+                currentUser = null;
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('currentUser');
+
+                // Show auth section
+                showAuthSection();
+
+                // Clear forms
+                document.getElementById('loginForm').reset();
+                document.getElementById('registerForm').reset();
+            }
+        }
+
+        /**
+         * Show main app, hide auth section
+         */
+        function showMainApp() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+
+            // Update user info in header
+            if (currentUser && currentUser.email) {
+                document.getElementById('userEmail').textContent = currentUser.email;
+            }
+
+            // Render UI
+            renderUI();
+        }
+
+        /**
+         * Show auth section, hide main app
+         */
+        function showAuthSection() {
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('authSection').classList.remove('hidden');
+        }
+
+        /**
+         * Validate email format
+         */
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        /**
+         * Validate password strength
+         */
+        function validatePassword(password) {
+            if (password.length < 8) {
+                return {
+                    valid: false,
+                    message: 'La password deve essere di almeno 8 caratteri'
+                };
+            }
+
+            // Check for at least one number
+            if (!/\d/.test(password)) {
+                return {
+                    valid: false,
+                    message: 'La password deve contenere almeno un numero'
+                };
+            }
+
+            // Check for at least one letter
+            if (!/[a-zA-Z]/.test(password)) {
+                return {
+                    valid: false,
+                    message: 'La password deve contenere almeno una lettera'
+                };
+            }
+
+            return { valid: true };
+        }
+
+        /**
+         * Check password strength and update UI
+         */
+        function checkPasswordStrength(password) {
+            const fill = document.getElementById('passwordStrengthFill');
+            const text = document.getElementById('passwordStrengthText');
+
+            if (password.length === 0) {
+                fill.className = 'password-strength-fill';
+                fill.style.width = '0%';
+                text.textContent = '';
+                return;
+            }
+
+            let strength = 0;
+            let strengthText = '';
+            let strengthClass = '';
+
+            // Length check
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+
+            // Character variety
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[^a-zA-Z\d]/.test(password)) strength++;
+
+            // Determine strength level
+            if (strength <= 2) {
+                strengthClass = 'weak';
+                strengthText = 'Debole';
+            } else if (strength <= 4) {
+                strengthClass = 'medium';
+                strengthText = 'Media';
+            } else {
+                strengthClass = 'strong';
+                strengthText = 'Forte';
+            }
+
+            fill.className = `password-strength-fill ${strengthClass}`;
+            text.textContent = strengthText;
+        }
+
+        /**
+         * Show auth error message
+         */
+        function showAuthError(message) {
+            const errorEl = document.getElementById('authError');
+            errorEl.textContent = message;
+            errorEl.classList.add('visible');
+
+            // Hide success
+            document.getElementById('authSuccess').classList.remove('visible');
+        }
+
+        /**
+         * Show auth success message
+         */
+        function showAuthSuccess(message) {
+            const successEl = document.getElementById('authSuccess');
+            successEl.textContent = message;
+            successEl.classList.add('visible');
+
+            // Hide error
+            document.getElementById('authError').classList.remove('visible');
+        }
+
+        /**
+         * Hide all auth messages
+         */
+        function hideAuthMessages() {
+            document.getElementById('authError').classList.remove('visible');
+            document.getElementById('authSuccess').classList.remove('visible');
+        }
 
         // ========== CORE FUNCTIONS ==========
 

@@ -463,3 +463,106 @@ Transform from localStorage app to full SaaS with backend, auth, and Stripe paym
 
 ---
 
+### [2026-01-27] Story #8: Frontend Authentication UI ✓
+**Status**: COMPLETED
+**Commit**: [pending]
+
+**What was implemented:**
+- Added complete authentication UI to index.html with login/register forms
+- Implemented tab-based navigation between Login and Register forms
+- Created login form with email/password fields and fetch() integration
+- Created registration form with name/email/password fields
+- Implemented JWT token storage in localStorage after successful login/registration
+- Added password strength indicator with visual feedback (weak/medium/strong)
+- Implemented comprehensive form validation:
+  * Email format validation using regex
+  * Password strength validation (min 8 chars, at least 1 number, 1 letter)
+  * Real-time password strength feedback during typing
+  * Client-side validation before API calls
+- Added show/hide logic based on authentication state:
+  * Auth section shown when not logged in
+  * Main app section shown when authenticated
+  * Automatic state restoration on page load (checks localStorage for token)
+- Implemented logout functionality with confirmation dialog
+- Updated header to show user email and logout button when authenticated
+- Added error and success message display for auth operations
+- Integrated with backend API endpoints (/api/auth/login.php, /api/auth/register.php)
+
+**Key Learnings:**
+1. Store both authToken and currentUser in localStorage for persistent sessions
+2. Check auth state on DOMContentLoaded to restore session automatically
+3. Use async/await for clean fetch() API calls with proper error handling
+4. Password strength calculation based on multiple factors (length, variety, special chars)
+5. Visual feedback (color-coded strength bar) improves UX significantly
+6. Tab switching requires managing both visual state (active class) and form visibility
+7. Success message should auto-switch tabs and pre-fill email for better UX
+8. Confirm dialog before logout prevents accidental logouts
+9. Hide/show sections using .hidden class with !important to override other styles
+10. Clear error messages on tab switch to prevent confusion
+
+**Frontend Architecture:**
+- Single-page application (SPA) pattern with conditional rendering
+- Two main sections: #authSection and #mainApp (toggle based on auth state)
+- Global state: authToken, currentUser stored in variables and localStorage
+- API calls use fetch() with async/await pattern
+- Error handling with try/catch and user-friendly error messages
+- Form validation happens before API calls (reduce unnecessary requests)
+
+**UI/UX Enhancements:**
+- Tab-based auth forms (cleaner than separate pages)
+- Real-time password strength indicator encourages stronger passwords
+- Success messages with auto-redirect to next logical step
+- Pre-fill email in login form after registration (convenience)
+- Logout button in header with user email display (clear state indication)
+- Responsive design maintained from existing styles
+- Consistent color scheme using CSS variables (--primary, --danger, --success)
+
+**CSS Additions:**
+- .auth-container, .auth-card for centered auth layout
+- .auth-tabs, .auth-tab for tab navigation styling
+- .auth-form, .auth-form-group for form layout
+- .auth-error, .auth-success for message display
+- .password-strength, .password-strength-bar for strength indicator
+- .logout-btn, .user-info for header user display
+- .header-content with flexbox for header layout
+- .hidden utility class for show/hide logic
+
+**JavaScript Functions Added:**
+- checkAuth(): Restore session from localStorage on page load
+- switchAuthTab(tab): Switch between login/register forms
+- handleLogin(event): Process login form submission
+- handleRegister(event): Process registration form submission
+- handleLogout(): Clear session and return to auth screen
+- validateEmail(email): Validate email format with regex
+- validatePassword(password): Validate password strength requirements
+- checkPasswordStrength(password): Real-time strength calculation and UI update
+- showAuthError(message): Display error message in auth section
+- showAuthSuccess(message): Display success message in auth section
+- hideAuthMessages(): Clear all auth messages
+- showMainApp(): Show main app, hide auth section
+- showAuthSection(): Show auth section, hide main app
+
+**Security Considerations:**
+- JWT token stored in localStorage (acceptable for SaaS, consider httpOnly cookies for higher security)
+- Password validation client-side AND server-side (defense in depth)
+- No password display in UI or console logs
+- Logout clears both token and user data from localStorage
+- Form inputs use type="password" for password fields
+- Email validation prevents common typos and invalid formats
+
+**Files Modified:**
+- index.html (added auth UI, JavaScript functions, CSS styles)
+- prd.json (marked story #8 as completed)
+- scripts/ralph/progress.txt (added story #8 learnings)
+
+**Testing:**
+- HTML structure verified (all required IDs present)
+- JavaScript functions verified (all auth functions defined)
+- CSS classes verified (auth styles, visibility classes)
+- localStorage usage verified (getItem/setItem for token and user)
+- API integration verified (fetch calls to /api/auth/login.php and register.php)
+
+**Next Story:** #9 - Frontend Subscription Flow
+
+---
+
