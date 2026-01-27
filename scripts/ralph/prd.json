@@ -1,0 +1,439 @@
+{
+  "project": "Expense Tracker Pro",
+  "version": "2.0",
+  "description": "Trasformazione da app localStorage a SaaS con backend, autenticazione e monetizzazione",
+  "tech_stack": {
+    "frontend": "HTML/CSS/JavaScript vanilla (esistente)",
+    "backend": "PHP 8.x API REST",
+    "database": "MySQL (server geniusmile)",
+    "payments": "Stripe Checkout + Webhooks",
+    "hosting": "etp.geniusmile.com"
+  },
+  "database_schema": {
+    "tables": {
+      "etp_users": {
+        "id": "INT AUTO_INCREMENT PRIMARY KEY",
+        "email": "VARCHAR(255) UNIQUE NOT NULL",
+        "password_hash": "VARCHAR(255) NOT NULL",
+        "name": "VARCHAR(100)",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "trial_expires_at": "TIMESTAMP",
+        "is_pro": "BOOLEAN DEFAULT FALSE",
+        "pro_expires_at": "TIMESTAMP NULL",
+        "stripe_customer_id": "VARCHAR(255) NULL",
+        "transaction_count": "INT DEFAULT 0"
+      },
+      "etp_transactions": {
+        "id": "INT AUTO_INCREMENT PRIMARY KEY",
+        "user_id": "INT NOT NULL FOREIGN KEY",
+        "amount": "DECIMAL(10,2) NOT NULL",
+        "category": "VARCHAR(50) NOT NULL",
+        "description": "VARCHAR(255)",
+        "date": "DATE NOT NULL",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+      },
+      "etp_categories": {
+        "id": "INT AUTO_INCREMENT PRIMARY KEY",
+        "user_id": "INT NOT NULL FOREIGN KEY",
+        "name": "VARCHAR(50) NOT NULL",
+        "icon": "VARCHAR(50)",
+        "color": "VARCHAR(7)"
+      },
+      "etp_subscriptions": {
+        "id": "INT AUTO_INCREMENT PRIMARY KEY",
+        "user_id": "INT NOT NULL FOREIGN KEY",
+        "stripe_subscription_id": "VARCHAR(255)",
+        "plan": "ENUM('monthly', 'yearly')",
+        "status": "ENUM('active', 'cancelled', 'expired')",
+        "started_at": "TIMESTAMP",
+        "expires_at": "TIMESTAMP"
+      }
+    }
+  },
+  "paywall_logic": {
+    "free_tier": {
+      "max_transactions": 50,
+      "max_days": 60,
+      "trigger": "FIRST_REACHED",
+      "description": "Utente diventa limited quando raggiunge 50 transazioni OPPURE 60 giorni dalla registrazione"
+    },
+    "limited_state": {
+      "can_view": true,
+      "can_add": false,
+      "can_export": false,
+      "show_upgrade_modal": true
+    },
+    "pro_tier": {
+      "monthly_price_eur": 4.99,
+      "yearly_price_eur": 39.99,
+      "features": ["Transazioni illimitate", "Export CSV/PDF", "Grafici avanzati", "Categorie personalizzate", "Backup automatico"]
+    }
+  },
+  "stories": [
+    {
+      "id": "1",
+      "title": "Setup Backend API Base",
+      "description": "Creare struttura backend PHP con routing, connessione DB e helpers",
+      "acceptance_criteria": [
+        "Creare /api/ folder con index.php come router",
+        "File config.php con credenziali DB (geniusmile_production)",
+        "Classe Database.php per connessione PDO",
+        "Classe Response.php per JSON responses standardizzate",
+        "Middleware per CORS headers",
+        "File .htaccess per URL rewriting"
+      ],
+      "priority": "critical",
+      "estimated_complexity": "medium",
+      "dependencies": [],
+      "status": "completed"
+    },
+    {
+      "id": "2",
+      "title": "Database Schema Migration",
+      "description": "Creare script SQL per generare le tabelle necessarie",
+      "acceptance_criteria": [
+        "File migrations/001_initial_schema.sql con tutte le tabelle",
+        "Prefisso tabelle: afts5498_etp_",
+        "Indici su email, user_id, date",
+        "Script può essere eseguito multiple volte (IF NOT EXISTS)"
+      ],
+      "priority": "critical",
+      "estimated_complexity": "low",
+      "dependencies": ["1"]
+    },
+    {
+      "id": "3",
+      "title": "Sistema Autenticazione - Registrazione",
+      "description": "Endpoint per registrazione nuovi utenti",
+      "acceptance_criteria": [
+        "POST /api/auth/register con email, password, name",
+        "Validazione email formato e unicità",
+        "Password hash con password_hash() bcrypt",
+        "Calcolo trial_expires_at = NOW() + 60 days",
+        "Ritorna JWT token valido 30 giorni",
+        "Email di benvenuto (opzionale, può essere stub)"
+      ],
+      "priority": "critical",
+      "estimated_complexity": "medium",
+      "dependencies": ["1", "2"]
+    },
+    {
+      "id": "4",
+      "title": "Sistema Autenticazione - Login",
+      "description": "Endpoint per login utenti esistenti",
+      "acceptance_criteria": [
+        "POST /api/auth/login con email, password",
+        "Verifica password con password_verify()",
+        "Ritorna JWT token + user data (senza password)",
+        "Ritorna is_pro status e days_remaining/transactions_remaining",
+        "Rate limiting: max 5 tentativi per IP per minuto"
+      ],
+      "priority": "critical",
+      "estimated_complexity": "medium",
+      "dependencies": ["3"]
+    },
+    {
+      "id": "5",
+      "title": "JWT Middleware",
+      "description": "Middleware per validare token su endpoint protetti",
+      "acceptance_criteria": [
+        "Classe JWTMiddleware.php",
+        "Legge token da header Authorization: Bearer xxx",
+        "Valida firma e scadenza",
+        "Inietta user_id nella request",
+        "Ritorna 401 se token invalido/scaduto"
+      ],
+      "priority": "critical",
+      "estimated_complexity": "medium",
+      "dependencies": ["3"]
+    },
+    {
+      "id": "6",
+      "title": "CRUD Transazioni - Create",
+      "description": "Endpoint per aggiungere nuova transazione",
+      "acceptance_criteria": [
+        "POST /api/transactions (autenticato)",
+        "Campi: amount, category, description, date",
+        "Verifica paywall: se user ha raggiunto limite, ritorna 403 con upgrade_required",
+        "Incrementa transaction_count su users",
+        "Ritorna transazione creata con id"
+      ],
+      "priority": "critical",
+      "estimated_complexity": "medium",
+      "dependencies": ["5"]
+    },
+    {
+      "id": "7",
+      "title": "CRUD Transazioni - Read",
+      "description": "Endpoint per leggere transazioni utente",
+      "acceptance_criteria": [
+        "GET /api/transactions (autenticato)",
+        "Ritorna tutte le transazioni dell'utente",
+        "Supporta query params: ?month=2025-01&category=food",
+        "Ordinate per data DESC",
+        "Include totali per categoria"
+      ],
+      "priority": "critical",
+      "estimated_complexity": "low",
+      "dependencies": ["5"]
+    },
+    {
+      "id": "8",
+      "title": "CRUD Transazioni - Update/Delete",
+      "description": "Endpoint per modificare/eliminare transazioni",
+      "acceptance_criteria": [
+        "PUT /api/transactions/{id} (autenticato)",
+        "DELETE /api/transactions/{id} (autenticato)",
+        "Verifica ownership: user può modificare solo sue transazioni",
+        "Delete decrementa transaction_count"
+      ],
+      "priority": "high",
+      "estimated_complexity": "low",
+      "dependencies": ["6"]
+    },
+    {
+      "id": "9",
+      "title": "Endpoint User Status",
+      "description": "Endpoint per controllare stato abbonamento e limiti",
+      "acceptance_criteria": [
+        "GET /api/user/status (autenticato)",
+        "Ritorna: is_pro, transaction_count, transactions_remaining (50-count), days_remaining (trial_expires - now), can_add_transaction (boolean)",
+        "Se pro: ritorna pro_expires_at e plan type"
+      ],
+      "priority": "high",
+      "estimated_complexity": "low",
+      "dependencies": ["5"]
+    },
+    {
+      "id": "10",
+      "title": "Integrazione Stripe - Setup",
+      "description": "Configurare Stripe products e prices",
+      "acceptance_criteria": [
+        "File stripe_config.php con API keys (test e live)",
+        "Documentare creazione Products in Stripe Dashboard",
+        "Product: ETP Pro Monthly (€4.99/mese recurring)",
+        "Product: ETP Pro Yearly (€39.99/anno recurring)",
+        "Salvare price_id nel config"
+      ],
+      "priority": "high",
+      "estimated_complexity": "low",
+      "dependencies": ["1"]
+    },
+    {
+      "id": "11",
+      "title": "Stripe Checkout Session",
+      "description": "Endpoint per creare sessione di pagamento Stripe",
+      "acceptance_criteria": [
+        "POST /api/payments/create-checkout (autenticato)",
+        "Body: { plan: 'monthly' | 'yearly' }",
+        "Crea/recupera Stripe customer da email",
+        "Crea Checkout Session con price_id corretto",
+        "success_url e cancel_url verso frontend",
+        "Ritorna checkout session URL"
+      ],
+      "priority": "high",
+      "estimated_complexity": "medium",
+      "dependencies": ["10"]
+    },
+    {
+      "id": "12",
+      "title": "Stripe Webhook Handler",
+      "description": "Endpoint per ricevere eventi da Stripe",
+      "acceptance_criteria": [
+        "POST /api/webhooks/stripe (pubblico ma verificato)",
+        "Verifica signature webhook con stripe_webhook_secret",
+        "Gestisce: checkout.session.completed → attiva PRO",
+        "Gestisce: invoice.paid → rinnova PRO",
+        "Gestisce: customer.subscription.deleted → disattiva PRO",
+        "Aggiorna is_pro e pro_expires_at su DB"
+      ],
+      "priority": "high",
+      "estimated_complexity": "high",
+      "dependencies": ["11"]
+    },
+    {
+      "id": "13",
+      "title": "Frontend - Auth UI",
+      "description": "Interfaccia login/registrazione nel frontend",
+      "acceptance_criteria": [
+        "Modal/page per login con email/password",
+        "Modal/page per registrazione con email/password/nome",
+        "Salva JWT in localStorage",
+        "Auto-login se token presente e valido",
+        "Logout button che cancella token",
+        "Loading states e error messages"
+      ],
+      "priority": "critical",
+      "estimated_complexity": "high",
+      "dependencies": ["4"]
+    },
+    {
+      "id": "14",
+      "title": "Frontend - Migrazione da localStorage a API",
+      "description": "Sostituire localStorage con chiamate API",
+      "acceptance_criteria": [
+        "Tutte le operazioni CRUD usano fetch() verso API",
+        "Header Authorization con JWT token",
+        "Gestione errori 401 → redirect a login",
+        "Gestione errori 403 → mostra upgrade modal",
+        "Offline detection con messaggio appropriato",
+        "Mantieni UX identica (form, lista, grafici)"
+      ],
+      "priority": "critical",
+      "estimated_complexity": "high",
+      "dependencies": ["13", "7", "8"]
+    },
+    {
+      "id": "15",
+      "title": "Frontend - Paywall UI",
+      "description": "Interfaccia per upgrade a PRO",
+      "acceptance_criteria": [
+        "Banner warning quando vicino al limite (>40 transazioni o <7 giorni)",
+        "Modal bloccante quando limite raggiunto",
+        "Mostra benefici PRO con pricing",
+        "Toggle mensile/annuale con risparmio evidenziato",
+        "Pulsante 'Upgrade' che chiama create-checkout",
+        "Redirect a Stripe Checkout",
+        "Success page dopo pagamento"
+      ],
+      "priority": "high",
+      "estimated_complexity": "medium",
+      "dependencies": ["14", "11"]
+    },
+    {
+      "id": "16",
+      "title": "Frontend - Dashboard PRO Status",
+      "description": "Mostrare stato abbonamento nella UI",
+      "acceptance_criteria": [
+        "Badge 'PRO' visibile se utente è pro",
+        "Se free: mostra 'X transazioni rimanenti' e 'Y giorni rimanenti'",
+        "Progress bar visuale verso il limite",
+        "Link a gestione abbonamento (Stripe Customer Portal)"
+      ],
+      "priority": "medium",
+      "estimated_complexity": "low",
+      "dependencies": ["15"]
+    },
+    {
+      "id": "17",
+      "title": "Data Migration Tool",
+      "description": "Tool per migrare dati da localStorage a server",
+      "acceptance_criteria": [
+        "Al primo login, check se esistono dati in localStorage",
+        "Prompt: 'Abbiamo trovato X transazioni salvate. Vuoi importarle?'",
+        "Bulk import via API POST /api/transactions/import",
+        "Cancella localStorage dopo import riuscito",
+        "Gestisce duplicati (skip se stessa data+amount+category)"
+      ],
+      "priority": "high",
+      "estimated_complexity": "medium",
+      "dependencies": ["14"]
+    },
+    {
+      "id": "18",
+      "title": "Export CSV (PRO only)",
+      "description": "Funzionalità export per utenti PRO",
+      "acceptance_criteria": [
+        "GET /api/transactions/export?format=csv (autenticato + PRO)",
+        "Se non PRO, ritorna 403 con upgrade_required",
+        "CSV con headers: Date, Amount, Category, Description",
+        "Filtri opzionali: date range, categories",
+        "Frontend: pulsante Export visibile solo a PRO (o disabled con tooltip)"
+      ],
+      "priority": "medium",
+      "estimated_complexity": "low",
+      "dependencies": ["9"]
+    },
+    {
+      "id": "19",
+      "title": "Stripe Customer Portal",
+      "description": "Permettere gestione abbonamento self-service",
+      "acceptance_criteria": [
+        "GET /api/payments/portal (autenticato + PRO)",
+        "Crea Stripe Billing Portal session",
+        "Utente può: cambiare piano, aggiornare carta, cancellare",
+        "return_url verso frontend",
+        "Link nel menu utente: 'Gestisci abbonamento'"
+      ],
+      "priority": "medium",
+      "estimated_complexity": "low",
+      "dependencies": ["12"]
+    },
+    {
+      "id": "20",
+      "title": "Email Transazionali Base",
+      "description": "Email automatiche per eventi chiave",
+      "acceptance_criteria": [
+        "Usa PHPMailer o mail() nativo",
+        "Email benvenuto alla registrazione",
+        "Email conferma pagamento",
+        "Email reminder 3 giorni prima scadenza trial",
+        "Email reminder quando raggiunge 45 transazioni",
+        "Template HTML semplice con branding ETP"
+      ],
+      "priority": "low",
+      "estimated_complexity": "medium",
+      "dependencies": ["3", "12"]
+    },
+    {
+      "id": "21",
+      "title": "Security Hardening",
+      "description": "Implementare best practices sicurezza",
+      "acceptance_criteria": [
+        "Rate limiting su tutti gli endpoint (redis o file-based)",
+        "CSRF token su form (se necessario)",
+        "SQL injection prevention (prepared statements ovunque)",
+        "XSS prevention (htmlspecialchars su output)",
+        "Secure headers (X-Frame-Options, CSP base)",
+        "Password requirements: min 8 char"
+      ],
+      "priority": "high",
+      "estimated_complexity": "medium",
+      "dependencies": ["14"]
+    },
+    {
+      "id": "22",
+      "title": "Testing & QA",
+      "description": "Test manuali e fix bug",
+      "acceptance_criteria": [
+        "Test completo flusso: register → add transactions → hit limit → upgrade → continue",
+        "Test Stripe in test mode con carte test",
+        "Test webhook con Stripe CLI",
+        "Fix tutti i bug trovati",
+        "Test mobile responsive"
+      ],
+      "priority": "critical",
+      "estimated_complexity": "medium",
+      "dependencies": ["15", "17"]
+    },
+    {
+      "id": "23",
+      "title": "Deploy Production",
+      "description": "Deploy su server e switch a Stripe live",
+      "acceptance_criteria": [
+        "API deployata su etp.geniusmile.com/api/",
+        "Stripe keys switchate a live mode",
+        "Webhook URL registrato in Stripe Dashboard",
+        "SSL verificato",
+        "Monitoring errori base (log file)",
+        "Backup DB automatico"
+      ],
+      "priority": "critical",
+      "estimated_complexity": "low",
+      "dependencies": ["22"]
+    }
+  ],
+  "success_metrics": {
+    "conversion_target": "5% free → paid",
+    "churn_target": "<10% monthly",
+    "ltv_target": "€30+ per user",
+    "payback_period": "< 3 mesi"
+  },
+  "notes": [
+    "Usare geniusmile_production DB con prefisso afts5498_etp_",
+    "JWT secret diverso da altri progetti",
+    "Stripe webhook secret in config separato",
+    "Non toccare il design esistente, solo aggiungere auth e paywall",
+    "Mantenere compatibilità con dati localStorage esistenti"
+  ]
+}
