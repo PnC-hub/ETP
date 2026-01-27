@@ -148,7 +148,7 @@
       "id": 9,
       "title": "Frontend Subscription Flow",
       "description": "Implement Stripe Checkout integration in frontend",
-      "status": "pending",
+      "status": "completed",
       "tasks": [
         "Add subscription status check on load",
         "Show subscription prompt for free users",

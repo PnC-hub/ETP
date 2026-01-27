@@ -688,6 +688,135 @@
             display: none !important;
         }
 
+        /* ========== SUBSCRIPTION MODAL ========== */
+        .subscription-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .subscription-modal.visible {
+            display: flex;
+        }
+
+        .subscription-modal-content {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .subscription-modal h2 {
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .subscription-modal p {
+            color: var(--text-light);
+            font-size: 15px;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .subscription-price {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .subscription-price span {
+            font-size: 20px;
+            color: var(--text-light);
+        }
+
+        .subscription-features {
+            text-align: left;
+            margin: 24px 0;
+            background: var(--background);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .subscription-feature {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .subscription-feature:last-child {
+            margin-bottom: 0;
+        }
+
+        .subscription-feature .icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .subscription-feature .text {
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .subscription-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .subscription-buttons .btn {
+            flex: 1;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            background: var(--background);
+            transform: translateY(-2px);
+        }
+
+        .subscription-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* ========== RESPONSIVE ========== */
         @media (max-width: 768px) {
             .container {
@@ -758,6 +887,18 @@
             .auth-card {
                 padding: 32px 24px;
             }
+
+            .subscription-modal-content {
+                padding: 32px 24px;
+            }
+
+            .subscription-price {
+                font-size: 40px;
+            }
+
+            .subscription-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -827,10 +968,53 @@
                 </div>
                 <div class="user-info">
                     <span class="user-email" id="userEmail"></span>
+                    <span id="subscriptionBadge" class="subscription-badge hidden">PRO</span>
                     <button class="logout-btn" onclick="handleLogout()">Logout</button>
                 </div>
             </div>
         </header>
+
+        <!-- SUBSCRIPTION MODAL -->
+        <div id="subscriptionModal" class="subscription-modal">
+            <div class="subscription-modal-content">
+                <h2>🚀 Sblocca il Potenziale Completo</h2>
+                <p>Hai raggiunto il limite gratuito. Passa a PRO per funzionalità illimitate e insights avanzati!</p>
+
+                <div class="subscription-price">
+                    €6.99<span>/mese</span>
+                </div>
+
+                <div class="subscription-features">
+                    <div class="subscription-feature">
+                        <span class="icon">✅</span>
+                        <span class="text">Transazioni illimitate</span>
+                    </div>
+                    <div class="subscription-feature">
+                        <span class="icon">📊</span>
+                        <span class="text">Analytics avanzati e previsioni</span>
+                    </div>
+                    <div class="subscription-feature">
+                        <span class="icon">📤</span>
+                        <span class="text">Export CSV e PDF</span>
+                    </div>
+                    <div class="subscription-feature">
+                        <span class="icon">🔔</span>
+                        <span class="text">Notifiche e budget alerts</span>
+                    </div>
+                    <div class="subscription-feature">
+                        <span class="icon">☁️</span>
+                        <span class="text">Backup cloud automatico</span>
+                    </div>
+                </div>
+
+                <div class="subscription-buttons">
+                    <button class="btn btn-outline" onclick="closeSubscriptionModal()">Non ora</button>
+                    <button class="btn btn-primary" onclick="handleSubscribe()" id="subscribeBtn">
+                        Passa a PRO
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- STATS CARDS -->
         <section class="stats-grid">
@@ -943,7 +1127,7 @@
 
         <!-- FOOTER -->
         <footer class="footer">
-            <div class="tip">
+            <div class="tip" id="footerTip">
                 💡 <strong>Consiglio:</strong> Usa questa versione FREE per 50 spese. Poi migra a PRO (€6.99/mese) per tracking illimitato + insights avanzati!
             </div>
             <p>Dati salvati solo nel tuo browser. Privacy garantita.</p>
@@ -955,6 +1139,7 @@
         const API_BASE = '/api';
         let authToken = null;
         let currentUser = null;
+        let subscriptionStatus = null;
 
         // ========== DATA & CONFIG ==========
         let expenses = [];
@@ -991,7 +1176,7 @@
         };
 
         // ========== INITIALIZATION ==========
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             // Check if user is already logged in
             checkAuth();
 
@@ -1010,6 +1195,8 @@
 
             // Render UI if logged in
             if (authToken) {
+                // Check subscription status
+                await checkSubscriptionStatus();
                 renderUI();
             }
 
@@ -1022,6 +1209,9 @@
                     }
                 });
             }
+
+            // Handle Stripe redirect return
+            handleStripeReturn();
         });
 
         // ========== AUTH FUNCTIONS ==========
@@ -1218,7 +1408,7 @@
         /**
          * Show main app, hide auth section
          */
-        function showMainApp() {
+        async function showMainApp() {
             document.getElementById('authSection').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
 
@@ -1226,6 +1416,9 @@
             if (currentUser && currentUser.email) {
                 document.getElementById('userEmail').textContent = currentUser.email;
             }
+
+            // Check subscription status
+            await checkSubscriptionStatus();
 
             // Render UI
             renderUI();
@@ -1353,6 +1546,160 @@
             document.getElementById('authSuccess').classList.remove('visible');
         }
 
+        // ========== SUBSCRIPTION FUNCTIONS ==========
+
+        /**
+         * Check subscription status from API
+         */
+        async function checkSubscriptionStatus() {
+            if (!authToken) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/user/status.php`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // The API returns { success: true, user: {...}, subscription: {...}, access: {...}, limits: {...} }
+                    // We need to extract the subscription object
+                    subscriptionStatus = data.subscription || null;
+                    updateSubscriptionUI();
+                } else {
+                    console.error('Failed to fetch subscription status:', data.error);
+                    subscriptionStatus = null;
+                }
+            } catch (error) {
+                console.error('Error checking subscription status:', error);
+                subscriptionStatus = null;
+            }
+        }
+
+        /**
+         * Update UI based on subscription status
+         */
+        function updateSubscriptionUI() {
+            const badge = document.getElementById('subscriptionBadge');
+
+            // Check if subscription exists and is active
+            // subscriptionStatus.is_active is set by the API based on status and expiration
+            if (subscriptionStatus && subscriptionStatus.is_active === true) {
+                // User has active subscription
+                badge.classList.remove('hidden');
+            } else {
+                // User is on free plan
+                badge.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Show subscription modal
+         */
+        function showSubscriptionModal() {
+            const modal = document.getElementById('subscriptionModal');
+            modal.classList.add('visible');
+        }
+
+        /**
+         * Close subscription modal
+         */
+        function closeSubscriptionModal() {
+            const modal = document.getElementById('subscriptionModal');
+            modal.classList.remove('visible');
+        }
+
+        /**
+         * Handle subscribe button click
+         */
+        async function handleSubscribe() {
+            const btn = document.getElementById('subscribeBtn');
+            const originalText = btn.innerHTML;
+
+            // Show loading state
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> Reindirizzamento...';
+
+            try {
+                const response = await fetch(`${API_BASE}/payments/create-checkout.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        success_url: `${window.location.origin}${window.location.pathname}?success=true`,
+                        cancel_url: `${window.location.origin}${window.location.pathname}?canceled=true`
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success && data.data.url) {
+                    // Redirect to Stripe Checkout
+                    window.location.href = data.data.url;
+                } else {
+                    alert('Errore durante la creazione della sessione di pagamento. Riprova.');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Subscribe error:', error);
+                alert('Errore di connessione. Riprova.');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        /**
+         * Handle return from Stripe Checkout
+         */
+        async function handleStripeReturn() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            if (urlParams.get('success') === 'true') {
+                // Payment successful
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+
+                // Show success message
+                setTimeout(async () => {
+                    alert('🎉 Pagamento completato! Benvenuto in Expense Tracker PRO!');
+
+                    // Refresh subscription status
+                    if (authToken) {
+                        await checkSubscriptionStatus();
+                    }
+                }, 500);
+            } else if (urlParams.get('canceled') === 'true') {
+                // Payment canceled
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+
+                setTimeout(() => {
+                    alert('Pagamento annullato. Puoi riprovare quando vuoi!');
+                }, 500);
+            }
+        }
+
+        /**
+         * Check if user can add more expenses
+         */
+        function canAddExpense() {
+            // If has active subscription, unlimited
+            if (subscriptionStatus && subscriptionStatus.is_active === true) {
+                return true;
+            }
+
+            // Free plan: check limit
+            return expenses.length < FREE_LIMIT;
+        }
+
         // ========== CORE FUNCTIONS ==========
 
         /**
@@ -1382,9 +1729,10 @@
                 return;
             }
 
-            // Check FREE limit
-            if (expenses.length >= FREE_LIMIT) {
-                alert('⚠️ Hai raggiunto il limite di 50 spese (versione FREE). Aggiorna a PRO per tracking illimitato!');
+            // Check if user can add more expenses
+            if (!canAddExpense()) {
+                // Show subscription modal instead of alert
+                showSubscriptionModal();
                 return;
             }
 
@@ -1453,6 +1801,7 @@
             updateTransactions();
             updateCharts();
             updateSavings();
+            updateFooter();
         }
 
         // ========== UPDATE FUNCTIONS ==========
@@ -1714,6 +2063,44 @@
                 `).join('');
             } else {
                 section.classList.remove('visible');
+            }
+        }
+
+        /**
+         * Update footer based on subscription status
+         */
+        function updateFooter() {
+            const footerTip = document.getElementById('footerTip');
+
+            if (subscriptionStatus && subscriptionStatus.is_active === true) {
+                // PRO user
+                footerTip.innerHTML = `
+                    🎉 <strong>Sei PRO!</strong> Tracking illimitato e funzionalità avanzate attive.
+                `;
+            } else {
+                // Free user - show usage
+                const remaining = FREE_LIMIT - expenses.length;
+                const usagePercent = Math.min((expenses.length / FREE_LIMIT) * 100, 100);
+
+                if (remaining <= 10 && remaining > 0) {
+                    footerTip.innerHTML = `
+                        ⚠️ <strong>Attenzione:</strong> Ti restano solo ${remaining} spese.
+                        <a href="javascript:showSubscriptionModal()" style="color: var(--primary); text-decoration: underline; font-weight: bold;">Passa a PRO</a>
+                        per tracking illimitato (€6.99/mese)!
+                    `;
+                } else if (remaining === 0) {
+                    footerTip.innerHTML = `
+                        🚫 <strong>Limite raggiunto!</strong>
+                        <a href="javascript:showSubscriptionModal()" style="color: var(--primary); text-decoration: underline; font-weight: bold;">Passa a PRO ora</a>
+                        per continuare a tracciare le tue spese!
+                    `;
+                } else {
+                    footerTip.innerHTML = `
+                        💡 <strong>Consiglio:</strong> Hai usato ${expenses.length}/${FREE_LIMIT} spese gratuite.
+                        <a href="javascript:showSubscriptionModal()" style="color: var(--primary); text-decoration: underline;">Passa a PRO</a>
+                        per tracking illimitato + insights avanzati!
+                    `;
+                }
             }
         }
 
