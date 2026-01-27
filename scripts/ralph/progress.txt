@@ -7,9 +7,9 @@ Transform from localStorage app to full SaaS with backend, auth, and Stripe paym
 
 ### Stories Overview
 - Total: 12 stories
-- Completed: 7
+- Completed: 9
 - In Progress: 0
-- Pending: 5
+- Pending: 3
 
 ---
 ## Iteration Log
@@ -563,6 +563,112 @@ Transform from localStorage app to full SaaS with backend, auth, and Stripe paym
 - API integration verified (fetch calls to /api/auth/login.php and register.php)
 
 **Next Story:** #9 - Frontend Subscription Flow
+
+---
+
+### [2026-01-27] Story #9: Frontend Subscription Flow ✓
+**Status**: COMPLETED
+**Commit**: 248472a
+
+**What was implemented:**
+- Added subscription status check on application load via /api/user/status endpoint
+- Created subscription modal with pricing and feature breakdown (€6.99/month)
+- Implemented "Subscribe" button that creates Stripe Checkout Session
+- Integrated redirect to Stripe Checkout with success/cancel URL handling
+- Implemented return flow from Stripe (handles ?success=true and ?canceled=true query params)
+- Added loading states with spinner animation during API calls
+- Updated UI dynamically based on subscription status:
+  * PRO badge in header when user has active subscription
+  * Footer message changes based on usage (free tier warning, limit alerts)
+  * Modal appears when free tier limit (50 transactions) is reached
+- Implemented canAddExpense() function to enforce free tier limits
+- Added updateSubscriptionUI() to show/hide subscription-related UI elements
+- Created updateFooter() with dynamic messages based on subscription status and usage
+- Added responsive design for subscription modal (mobile-friendly)
+
+**Key Learnings:**
+1. API returns subscription object with is_active boolean (calculated server-side)
+2. Check subscription status after login AND after returning from Stripe
+3. Use URL query parameters (?success=true) to detect Stripe redirect return
+4. Clean URL after processing redirect (window.history.replaceState) for clean UX
+5. Loading spinner improves perceived performance during Stripe redirect
+6. Modal prevents adding transactions at limit (better UX than alert)
+7. Footer message should be contextual: show remaining transactions when close to limit
+8. async/await pattern for subscription checks keeps code clean
+9. subscriptionStatus global variable allows UI to react to subscription changes
+10. Stripe Checkout URL comes from /api/payments/create-checkout.php in data.data.url
+
+**Subscription Flow:**
+1. User loads app → checkSubscriptionStatus() called
+2. If no subscription → show free tier info in footer
+3. User tries to add 51st transaction → showSubscriptionModal()
+4. User clicks "Passa a PRO" → handleSubscribe() called
+5. API creates Stripe Checkout Session → redirect to Stripe
+6. User completes payment → Stripe redirects to success_url
+7. handleStripeReturn() detects ?success=true → shows success message
+8. checkSubscriptionStatus() called again → updates UI to PRO
+
+**UI Components Added:**
+- #subscriptionModal: Overlay modal with pricing and features
+- #subscriptionBadge: "PRO" badge in header (hidden for free users)
+- .subscription-modal-content: Centered modal card with pricing
+- .subscription-features: List of PRO features with icons
+- .subscription-buttons: Action buttons (Non ora, Passa a PRO)
+- .loading-spinner: CSS animation for button loading state
+- @keyframes spin: Rotation animation for spinner
+
+**JavaScript Functions Added:**
+- checkSubscriptionStatus(): Fetch subscription from /api/user/status
+- updateSubscriptionUI(): Update badge and UI elements based on status
+- showSubscriptionModal(): Display subscription upgrade modal
+- closeSubscriptionModal(): Hide subscription modal
+- handleSubscribe(): Create Stripe Checkout Session and redirect
+- handleStripeReturn(): Process return from Stripe (success/cancel)
+- canAddExpense(): Check if user can add more transactions
+- updateFooter(): Update footer message based on subscription and usage
+
+**CSS Additions:**
+- .subscription-modal, .subscription-modal-content for modal layout
+- .subscription-price, .subscription-features for pricing display
+- .subscription-feature with icon + text layout
+- .subscription-badge for PRO badge styling
+- .loading-spinner for button loading animation
+- Responsive styles for mobile (480px breakpoint)
+
+**API Integration:**
+- GET /api/user/status → returns subscription object with is_active flag
+- POST /api/payments/create-checkout → returns sessionId and url
+- Webhook handling already implemented in Story #4 (updates subscription table)
+
+**Error Handling:**
+- Graceful fallback if subscription status fetch fails (assumes free tier)
+- Alert messages for payment errors (connection issues, API errors)
+- Success/cancel alerts with appropriate messaging
+- Console logging for debugging subscription status issues
+
+**UX Improvements:**
+- Modal appears only when limit reached (non-intrusive for free users)
+- "Non ora" button allows closing modal (no forced upgrade)
+- Footer shows remaining transactions when approaching limit
+- Success message confirms payment completion
+- Loading spinner prevents double-clicks during redirect
+- PRO badge clearly indicates subscription status
+- Clean URL after Stripe redirect (no query params left in address bar)
+
+**Files Modified:**
+- index.html (added subscription modal, CSS, JavaScript functions)
+- prd.json (marked story #9 as completed)
+- scripts/ralph/progress.txt (added story #9 learnings)
+
+**Testing:**
+- Subscription status check verified (checkSubscriptionStatus function)
+- Modal show/hide logic verified (showSubscriptionModal, closeSubscriptionModal)
+- Subscribe button handler verified (handleSubscribe with loading state)
+- Stripe return handling verified (handleStripeReturn with URL cleanup)
+- canAddExpense logic verified (checks subscription status and free limit)
+- Footer update logic verified (dynamic messages based on usage)
+
+**Next Story:** #10 - Frontend Transaction Management
 
 ---
 
