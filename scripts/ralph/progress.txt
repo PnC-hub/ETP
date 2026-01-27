@@ -7,9 +7,9 @@ Transform from localStorage app to full SaaS with backend, auth, and Stripe paym
 
 ### Stories Overview
 - Total: 12 stories
-- Completed: 3
+- Completed: 6
 - In Progress: 0
-- Pending: 9
+- Pending: 6
 
 ---
 ## Iteration Log
@@ -298,6 +298,99 @@ Transform from localStorage app to full SaaS with backend, auth, and Stripe paym
 - Documentation provides clear examples for future endpoint integration
 
 **Next Story:** #6 - Transaction CRUD API
+
+---
+
+### [2026-01-27] Story #6: Transaction CRUD API ✓
+**Status**: COMPLETED
+**Commit**: 98bb7de
+
+**What was implemented:**
+- Created transactions/create.php endpoint:
+  * Full validation for type, amount, date, category, description
+  * Transaction limit check using SubscriptionMiddleware::requireTransactionLimit()
+  * Validates type must be 'income' or 'expense'
+  * Validates amount is positive number with max 2 decimals
+  * Validates date format (YYYY-MM-DD) and actual date validity
+  * Validates category length (1-50 chars) and description length (max 500 chars)
+  * Returns complete transaction object after creation (201 Created)
+- Created transactions/read.php endpoint with advanced features:
+  * Pagination support (page, limit with max 100 items per page)
+  * Multiple filter options: type, category, date_from, date_to, search (in description)
+  * Sorting by date, amount, or created_at (asc/desc)
+  * Returns pagination metadata (total_items, total_pages, has_next, has_previous)
+  * Calculates summary statistics (total_income, total_expenses, net_balance) for filtered data
+  * Returns subscription_status info for frontend UI decisions
+  * Efficient SQL with WHERE clause building and prepared statements
+- Created transactions/update.php endpoint:
+  * Supports partial updates (only update fields that are provided)
+  * Validates ownership before allowing update (user_id check)
+  * Same validation as create endpoint for all updatable fields
+  * Returns updated transaction object
+  * Returns 404 if transaction not found or doesn't belong to user
+- Created transactions/delete.php endpoint:
+  * Accepts transaction ID via query parameter (?id=123) or JSON body
+  * Validates ownership before allowing deletion
+  * Returns deleted transaction details in response (for undo functionality)
+  * Returns 404 if transaction not found or doesn't belong to user
+- Updated api/index.php router:
+  * Changed transactions routes to use explicit action names: /api/transactions/create, /read, /update, /delete
+  * Each endpoint handles its own JWT verification (consistency with other endpoints)
+  * Clear error message showing available endpoints when route not found
+
+**Key Learnings:**
+1. Transaction limit enforcement happens at CREATE time only (not read/update/delete)
+2. SubscriptionMiddleware provides two methods: checkSubscription() (non-blocking) and requireTransactionLimit() (exits on failure)
+3. Read endpoint calculates summary statistics for FILTERED data (not all user transactions)
+4. Pagination params: limit defaults to 50, max is 100 to prevent excessive data transfer
+5. UPDATE endpoint supports partial updates (build dynamic SET clause based on provided fields)
+6. DELETE endpoint returns deleted data for UI undo functionality or confirmation messages
+7. Date validation requires two checks: regex for format AND DateTime::createFromFormat() for validity
+8. Amount validation: is_numeric() check then round to 2 decimals to prevent precision issues
+9. All endpoints verify ownership (WHERE user_id = ?) to prevent unauthorized access to other users' data
+10. Used composite index idx_user_date from schema for efficient date range queries
+
+**Query Optimization:**
+- Read endpoint uses two queries: one COUNT(*) for pagination, one SELECT for data
+- Summary statistics use SUM(CASE WHEN...) for efficient aggregation in single query
+- All queries use prepared statements with parameterized values
+- Filters build WHERE clause dynamically to avoid unnecessary OR conditions
+- LIMIT and OFFSET applied at end of params array for efficient pagination
+
+**Validation Strategy:**
+- Type validation: whitelist check (must be 'income' or 'expense')
+- Amount validation: numeric check + positive check + round to 2 decimals
+- Date validation: regex for format + DateTime parsing for validity
+- Category validation: length check (1-50 chars)
+- Description validation: optional field + length check (max 500 chars)
+- All string inputs trimmed before validation to prevent whitespace-only values
+
+**Error Handling:**
+- 400 Bad Request: validation errors, missing fields, invalid JSON
+- 401 Unauthorized: JWT token missing, expired, or invalid
+- 402 Payment Required: transaction limit reached, subscription required
+- 404 Not Found: transaction doesn't exist or doesn't belong to user
+- 405 Method Not Allowed: wrong HTTP method for endpoint
+- 500 Internal Server Error: database errors, unexpected exceptions
+
+**Files Created:**
+- api/transactions/create.php (create transaction with validation)
+- api/transactions/read.php (read with filtering and pagination)
+- api/transactions/update.php (update with partial support)
+- api/transactions/delete.php (delete with ownership check)
+
+**Files Modified:**
+- api/index.php (updated transaction routes to use explicit action names)
+- prd.json (marked story #6 as completed)
+
+**Testing:**
+- All PHP files pass syntax validation (php -l)
+- Router correctly routes to all CRUD endpoints
+- Subscription middleware integration verified (requireTransactionLimit in create.php)
+- Ownership verification confirmed (user_id check in update/delete)
+- Pagination logic confirmed (LIMIT/OFFSET calculation)
+
+**Next Story:** #7 - Data Export Feature
 
 ---
 
