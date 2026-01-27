@@ -86,7 +86,7 @@
       "id": 5,
       "title": "Subscription Management",
       "description": "Store and manage subscription status in database",
-      "status": "pending",
+      "status": "completed",
       "tasks": [
         "Create user/status.php endpoint to check subscription",
         "Update subscriptions table on webhook events",
