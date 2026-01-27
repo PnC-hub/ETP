@@ -1,0 +1,36 @@
+# PHP Dependencies
+/vendor/
+
+# Composer files (keep composer.json and composer.lock)
+# composer.phar
+
+# Local configuration
+api/config.local.php
+
+# Test files (optional - can be committed)
+# test_api.php
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment files
+.env
+.env.local
+
+# Logs
+*.log
+error_log
+
+# Temporary files
+tmp/
+temp/
+cache/
+
+# OS Files
+Thumbs.db
+desktop.ini
