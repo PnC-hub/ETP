@@ -1,6 +1,6 @@
 <?php
 /**
- * ETP Local Testing Configuration
+ * RiduciSpese Local Testing Configuration
  * Override database settings for local testing
  */
 
@@ -31,7 +31,7 @@ define('ENVIRONMENT', 'development');
 define('STRIPE_SECRET_KEY', ENVIRONMENT === 'production' ? STRIPE_SECRET_KEY_LIVE : STRIPE_SECRET_KEY_TEST);
 
 // Application Settings
-define('APP_NAME', 'Expense Tracker Pro');
+define('APP_NAME', 'RiduciSpese');
 define('APP_URL', 'http://localhost:8000');
 define('API_URL', 'http://localhost:8000/api');
 

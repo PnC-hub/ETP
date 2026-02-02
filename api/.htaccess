@@ -1,4 +1,4 @@
-# ETP API - Apache Configuration
+# RiduciSpese API - Apache Configuration
 # Enable URL rewriting and security headers
 
 # Enable Rewrite Engine
@@ -68,8 +68,5 @@ Options -Indexes
     php_value memory_limit 128M
 </IfModule>
 
-# Deny access to .git directory
-<DirectoryMatch "\.git">
-    Order allow,deny
-    Deny from all
-</DirectoryMatch>
+# Note: .git protection is handled by server configuration or FilesMatch
+# DirectoryMatch is not allowed in .htaccess

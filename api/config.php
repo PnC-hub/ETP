@@ -1,6 +1,6 @@
 <?php
 /**
- * ETP Configuration File
+ * RiduciSpese Configuration File
  * Contains database credentials, JWT settings, and API keys
  */
 
@@ -32,9 +32,9 @@ define('ENVIRONMENT', 'development'); // change to 'production' when live
 define('STRIPE_SECRET_KEY', ENVIRONMENT === 'production' ? STRIPE_SECRET_KEY_LIVE : STRIPE_SECRET_KEY_TEST);
 
 // Application Settings
-define('APP_NAME', 'Expense Tracker Pro');
-define('APP_URL', 'https://etp.geniusmile.com');
-define('API_URL', 'https://etp.geniusmile.com/api');
+define('APP_NAME', 'RiduciSpese');
+define('APP_URL', 'https://riducispese.it');
+define('API_URL', 'https://riducispese.it/api');
 
 // Paywall Limits
 define('FREE_MAX_TRANSACTIONS', 50);

@@ -1,6 +1,6 @@
 <?php
 /**
- * ETP API Router
+ * RiduciSpese API Router
  * Main entry point for all API requests
  */
 
