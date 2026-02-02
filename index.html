@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RiduciSpese - Tieni sotto controllo le tue spese quotidiane</title>
     <meta name="description" content="Traccia le tue spese, risparmia di più. Categorizzazione automatica, budget mensili, report dettagliati e privacy al 100%.">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d9488">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ========== CSS VARIABLES ========== */
@@ -1616,6 +1619,10 @@
                     alert('Funzionalità non ancora implementata. Contatta il supporto.');
                 }
             }
+        }
+        // PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
         }
     </script>
 </body>
