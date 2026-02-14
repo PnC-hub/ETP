@@ -115,6 +115,15 @@ try {
             }
             break;
 
+        case 'feedback':
+            // Feedback endpoint (accepts both authenticated and anonymous feedback)
+            if ($method === 'POST') {
+                require_once __DIR__ . '/feedback.php';
+            } else {
+                Response::error('Method not allowed. Use POST', 405);
+            }
+            break;
+
         case 'health':
             // Health check endpoint
             Response::success([
